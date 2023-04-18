@@ -1,0 +1,3 @@
+gz21/mlruns/*
+gz21/__pycache__/*
+*.pyc
