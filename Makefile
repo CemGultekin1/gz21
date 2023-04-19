@@ -35,12 +35,17 @@ setup-miniconda:
 setup-requirements: requirements.txt
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
-		pip install -r requirements.txt
+		pip install -r requirements.txt;
 	"
 
 create-root-txt:
 	echo $$(pwd) > root.txt 
 	mkdir outputs
-	
-.PHONY: setup-requirements setup-miniconda
-.SILENT: setup-requirements setup-miniconda
+
+interactive-singularity:	
+	echo run \"source /ext3/env.sh\"
+	echo print \"exit\" to exit
+	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash
+
+.PHONY: setup-requirements setup-miniconda create-root-txt
+.SILENT: setup-requirements setup-miniconda create-root-txt interactive-singularity
