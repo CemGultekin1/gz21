@@ -18,7 +18,6 @@ endef
 
 SOURCE_TEXT= "\#!/bin/bash $(newline) source /ext3/miniconda3/etc/profile.d/conda.sh $(newline) export PATH=/ext3/miniconda3/bin:\$$PATH"
 
-
 setup-miniconda:
 	cp -rp $(GZPATH) .
 	gunzip $(GZFILE)
@@ -39,9 +38,9 @@ setup-requirements: requirements.txt
 		pip install -r requirements.txt
 	"
 
-setup-paths:
-	echo $$(pwd) > root_folder.txt 
-	mkdir 
+create-root-txt:
+	echo $$(pwd) > root.txt 
+	mkdir outputs
 	
-.PHONY: setup-singularity interactive-singularity
-.SILENT: setup-singularity interactive-singularity
+.PHONY: setup-requirements setup-miniconda
+.SILENT: setup-requirements setup-miniconda

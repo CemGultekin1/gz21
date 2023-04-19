@@ -1,4 +1,5 @@
-gz21/mlruns/*
-gz21/__pycache__/*
+code/mlruns/*
+code/__pycache__/*
 *.pyc
 *.ext3
+outputs
