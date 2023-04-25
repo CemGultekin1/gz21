@@ -43,14 +43,14 @@ setup-greene:
 	make setup-conda-env
 
 
-interactive-singularity-write:	
+interactive-singularity-writing-permitted:	
 	echo run \"source /ext3/env.sh\"
 	echo to activate conda environment \"conda activate pangeo\"
 	echo to deactivate conda environment \"conda deactivate\"
 	echo print \"exit\" to exit
 	singularity exec --overlay $(EXTFILE):rw $(CUDA_SINGULARITY) /bin/bash
 
-interactive-singularity:	
+interactive-singularity-read-only:	
 	echo run \"source /ext3/env.sh\"
 	echo to activate conda environment \"conda activate pangeo\"
 	echo to deactivate conda environment \"conda deactivate\"
