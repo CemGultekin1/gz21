@@ -32,20 +32,33 @@ setup-miniconda:
 		rm -rf $(GZFILE);
 	"
 	
-setup-requirements: requirements.txt
+setup-conda-env: code/conda.yaml
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
-		pip install -r requirements.txt;
+		conda env create -f code/conda.yaml
 	"
 
-create-root-txt:
-	echo $$(pwd) > root.txt 
-	mkdir outputs
+setup-greene: 
+	make setup-miniconda
+	make setup-conda-env
+
+
+interactive-singularity-write:	
+	echo run \"source /ext3/env.sh\"
+	echo to activate conda environment \"conda activate pangeo\"
+	echo to deactivate conda environment \"conda deactivate\"
+	echo print \"exit\" to exit
+	singularity exec --overlay $(EXTFILE):rw $(CUDA_SINGULARITY) /bin/bash
 
 interactive-singularity:	
 	echo run \"source /ext3/env.sh\"
+	echo to activate conda environment \"conda activate pangeo\"
+	echo to deactivate conda environment \"conda deactivate\"
 	echo print \"exit\" to exit
-	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash
+	singularity exec --overlay $(EXTFILE):ro $(CUDA_SINGULARITY) /bin/bash
+	
+test:
+	echo $(pwd)
 
-.PHONY: setup-requirements setup-miniconda create-root-txt
-.SILENT: setup-requirements setup-miniconda create-root-txt interactive-singularity
+.PHONY: setup-conda-env setup-miniconda create-root-txt
+.SILENT: setup-conda-env setup-miniconda create-root-txt interactive-singularity

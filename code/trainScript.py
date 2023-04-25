@@ -46,6 +46,7 @@ import copy
 from utils import TaskInfo
 from dask.diagnostics import ProgressBar
 
+
 def negative_int(value: str):
     return -int(value)
 
@@ -129,6 +130,7 @@ model_name = 'trained_model.pth'
 
 # Directories where temporary data will be saved
 data_location = tempfile.mkdtemp(dir='/scratch/ag7531/temp/')
+
 print('Created temporary dir at  ', data_location)
 
 figures_directory = 'figures'
