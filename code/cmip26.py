@@ -19,7 +19,7 @@ import mlflow
 
 from data.utils import cyclize_dataset
 from data.coarse import eddy_forcing
-from data.pangeo_catalog import get_patch
+from data.pangeo_catalog import get_patch_from_file
 import logging
 import tempfile
 
@@ -40,8 +40,8 @@ CATALOG_URL = 'https://raw.githubusercontent.com/pangeo-data/pangeo-datastore\
 DESCRIPTION = 'Read data from the CM2.6 and \
         apply coarse graining. Stores the resulting dataset into an MLFLOW \
         experiment within a specific run.'
-
-data_location = tempfile.mkdtemp(dir='/scratch/ag7531/temp/')
+from paths import TEMP
+data_location = tempfile.mkdtemp(dir=TEMP)#'/scratch/ag7531/temp/')
 
 # Parse the command-line parameters
 parser = argparse.ArgumentParser(description=DESCRIPTION)
@@ -62,7 +62,7 @@ params = parser.parse_args()
 
 
 # Retrieve the patch of data specified in the command-line args
-patch_data, grid_data = get_patch(CATALOG_URL, params.ntimes, params.bounds,
+patch_data, grid_data = get_patch_from_file(CATALOG_URL, params.ntimes, params.bounds,
                                   params.CO2, 'usurf', 'vsurf')
 
 logger.debug(patch_data)

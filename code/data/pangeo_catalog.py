@@ -11,10 +11,32 @@ import xarray as xr
 import numpy as np
 
 from intake.config import conf
-conf['persist_path'] = '/scratch/ag7531/'
-CACHE_FOLDER = '/scratch/ag7531/cm26_cache'
+from paths import ROOT,OUTPUTS,CM2P6_SURFACE_1PCT_CO2_UVT,CM2P6_SURFACE_UVT,GRID_DATA
+conf['persist_path'] = ROOT#'/scratch/ag7531/'
+CACHE_FOLDER = OUTPUTS#'/scratch/ag7531/cm26_cache'
 
+# patch_data, grid_data = get_patch(CATALOG_URL, params.ntimes, params.bounds,
+#                                   params.CO2, 'usurf', 'vsurf')
 
+def get_patch_from_file(ntimes:int = None,bounds:list = None,cO2_level=0,*selected_vars):
+    path = CM2P6_SURFACE_UVT if cO2_level == 0 else CM2P6_SURFACE_1PCT_CO2_UVT
+    assert cO2_level in [0,1]
+    uv_data = xr.open_zarr(path)
+    grid_data = xr.open_zarr(GRID_DATA)
+    grid_data = grid_data.reset_coords()[['dxu', 'dyu', 'wet']]
+    if bounds is not None:
+        uv_data = uv_data.sel(xu_ocean=slice(*bounds[2:]),
+                              yu_ocean=slice(*bounds[:2]))
+        grid_data = grid_data.sel(xu_ocean=slice(*bounds[2:]),
+                                  yu_ocean=slice(*bounds[:2]))
+    if ntimes is not None:
+        uv_data = uv_data.isel(time=slice(0, ntimes))
+
+    if len(selected_vars) == 0:
+        return uv_data, grid_data
+    else:
+        return uv_data[list(selected_vars)], grid_data
+    
 def get_patch(catalog_url, ntimes: int = None, bounds: list = None,
               cO2_level=0, *selected_vars):
     """
