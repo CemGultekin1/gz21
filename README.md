@@ -15,9 +15,12 @@ make interactive-singularity-writing-permitted
 You need to see `Singularity> ` if you are inside the singularity. In order to exit the singularity
 use the command `exit`.
 
-Use `mlflow` with the processes defined in `MLproject`
+Once inside the singularity, use the follow command to load the environment.
+```
+source /ext3/env.sh
+```
 
-For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables into `temp` under a random folder name.
+The `mlflow` steps are defined in `MLproject`. For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables into `temp` under a random folder name.
 
 ```
 mlflow run code --env-manager local
