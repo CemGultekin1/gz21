@@ -35,7 +35,7 @@ setup-miniconda:
 setup-conda-env: code/conda.yaml
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
-		conda env create -f code/conda.yaml
+		conda env create -f environment_droplet.yml
 	"
 
 setup-greene: 
