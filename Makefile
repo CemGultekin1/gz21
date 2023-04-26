@@ -32,7 +32,7 @@ setup-miniconda:
 		rm -rf $(GZFILE);
 	"
 	
-setup-conda-env: code/conda.yaml
+setup-conda-env: gz21/conda.yaml
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
 		conda env create -f environment_droplet.yml
@@ -41,7 +41,7 @@ setup-conda-env: code/conda.yaml
 setup-greene: 
 	make setup-miniconda
 	make setup-conda-env
-	echo $(pwd)>code/root.txt
+	echo $(pwd)>gz21/root.txt
 
 
 interactive-singularity-writing-permitted:	
