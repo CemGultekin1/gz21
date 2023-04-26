@@ -3,9 +3,21 @@ name: cmip2_6
 entry_points:
   peek:
     command: "python gz21/plots/peek.py"
+  data-test:
+    parameters:
+      ntimes : {type: int, default: 1}
+      CO2: {type: int, default: 0}
+      lat_min : {type: float, default: -90}
+      lat_max : {type: float, default: 90}
+      long_min : {type: float, default: -360}
+      long_max : {type: float, default: 360}
+      factor: {type: float, default: 4}
+      chunk_size: {type: string, default: 50}
+      global: {type: str, default: 1}
+    command: "python gz21/cmip26.py {lat_min} {lat_max} {long_min} {long_max} --CO2 {CO2} --ntimes {ntimes} --factor {factor} --chunk_size {chunk_size} --global_ {global}" 
   data:
     parameters:
-      ntimes : {type: float, default: 1}
+      ntimes : {type: int, default: 10000}
       CO2: {type: int, default: 0}
       lat_min : {type: float, default: -90}
       lat_max : {type: float, default: 90}

@@ -20,8 +20,17 @@ Once inside the singularity, use the follow command to load the environment.
 source /ext3/env.sh
 ```
 
-The `mlflow` steps are defined in `MLproject`. For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables into `temp` under a random folder name.
+The `mlflow` steps are defined in `MLproject`. For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables as an mlflow artifact
+into `mlruns/<experiment_id>/<run_id>/artifacts/forcing/`. 
 
 ```
-mlflow run . --env-manager local --experiment-name data_generation --run-name test
+mlflow run -e data-test . --env-manager local --experiment-name data_generation --run-name test
+```
+
+To access the generated data, the above entered params `experiment_name` and `run_name` can be used as provided in `peek.py`. 
+Inside `MLproject`, `peek` is another entry point which plots `time=0` fields of the data. The plots are 
+saved as artifacts similar to the data. 
+
+```
+mlflow run -e peek . --env-manager local --experiment-name data_generation --run-name peek
 ```

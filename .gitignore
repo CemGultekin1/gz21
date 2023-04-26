@@ -1,6 +1,5 @@
 gz21/__pycache__/*
 *.pyc
 *.ext3
-outputs
 mlruns
 temp
