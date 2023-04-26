@@ -12,13 +12,16 @@ Or to use it with writing permits
 ```
 make interactive-singularity-writing-permitted
 ```
-You need to see `Singularity> ` if you are now inside the singularity. We can now employ `pangeo` 
-environment using
+
+You need to see `Singularity> ` if you are inside the singularity. In order to exit the singularity
+use the command `exit`.
+
+Employ `pangeo` environment by using the command line
 ```
 source /ext3/env.sh
 conda activate pangeo
 ```
-It should look like `(pangeo) Singularity> `. We can now use `mlflow` with the processes defined in `code/MLproject`
+It should look like `(pangeo) Singularity> `. Use `mlflow` with the processes defined in `code/MLproject`
 
 For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables into `temp` under a random folder name.
 
