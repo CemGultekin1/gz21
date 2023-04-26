@@ -1,7 +1,12 @@
 import mlflow
 
 def workflow():
-    with mlflow.start_run() as active_run:
-            mlflow.run(".", "data", env_manager='local')
+    pass
+    # experiment_name = "data_generation"
+    # experiment_id = mlflow.create_experiment(experiment_name)
+    # run_name = "test"
+    # with mlflow.start_run(experiment_id=experiment_id, run_name=run_name,env_manager='local') as run:
+        
+            
 if __name__ == '__main__':
     workflow()  

@@ -1,9 +1,11 @@
 name: cmip2_6
 
 entry_points:
-  main:
+  test:
     command: "python gz21/main.py"
-  data:
+  plot:
+    command: "python gz21/plots/glbl.py"
+  main:
     parameters:
       ntimes : {type: float, default: 2}
       CO2: {type: int, default: 0}
