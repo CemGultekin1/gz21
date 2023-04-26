@@ -1,6 +1,6 @@
 import os
 def read_made_dictionary():
-    file1 = open('made.txt', 'r')
+    file1 = open('root.txt', 'r')
     lines = file1.readlines()
     file1.close()
     files = {}
