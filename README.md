@@ -23,5 +23,5 @@ source /ext3/env.sh
 The `mlflow` steps are defined in `MLproject`. For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables into `temp` under a random folder name.
 
 ```
-mlflow run code --env-manager local
+mlflow run . --env-manager local
 ```
