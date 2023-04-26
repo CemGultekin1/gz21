@@ -1,13 +1,11 @@
 name: cmip2_6
 
 entry_points:
-  test:
-    command: "python gz21/main.py"
-  plot:
-    command: "python gz21/plots/glbl.py"
-  main:
+  peek:
+    command: "python gz21/plots/peek.py"
+  data:
     parameters:
-      ntimes : {type: float, default: 2}
+      ntimes : {type: float, default: 1}
       CO2: {type: int, default: 0}
       lat_min : {type: float, default: -90}
       lat_max : {type: float, default: 90}

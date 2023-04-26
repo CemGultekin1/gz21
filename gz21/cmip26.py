@@ -31,15 +31,12 @@ def main():
     logger = logging.getLogger(__name__)
 
 
-    # Script parameters
-    CATALOG_URL = 'https://raw.githubusercontent.com/pangeo-data/pangeo-datastore\
-    /master/intake-catalogs/master.yaml'
 
     DESCRIPTION = 'Read data from the CM2.6 and \
             apply coarse graining. Stores the resulting dataset into an MLFLOW \
             experiment within a specific run.'
-    from paths import TEMP
-    data_location = tempfile.mkdtemp(dir=TEMP)#'/scratch/ag7531/temp/')
+
+    # data_location = tempfile.mkdtemp(dir='/scratch/ag7531/temp/')
 
     # Parse the command-line parameters
     parser = argparse.ArgumentParser(description=DESCRIPTION)
@@ -126,18 +123,14 @@ def main():
     logger.info('Preparing forcing data')
     logger.debug(forcing)
     # export data
-    print(f"data_location = {data_location}")
-    forcing.to_zarr(join(data_location, 'forcing'), mode='w')
-
-    # Log as an artifact the forcing data
-    logger.info('Logging processed dataset as an artifact...')
-    mlflow.log_artifact(join(data_location, 'forcing'))
-    logger.info('Completed...')
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        print(f"data_location = {tmpdirname}")
+        forcing.to_zarr(join(tmpdirname, 'forcing'), mode='w')
+        # Log as an artifact the forcing data
+        logger.info('Logging processed dataset as an artifact...')
+        mlflow.log_artifact(join(tmpdirname, 'forcing'))
+        logger.info('Completed...')
     
     
-    
-
-        
-            
 if __name__ == '__main__':
-    main()  
+    main()

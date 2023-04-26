@@ -11,9 +11,9 @@ import xarray as xr
 # import numpy as np
 
 # from intake.config import conf
-from paths import OUTPUTS,CM2P6_SURFACE_1PCT_CO2_UVT,CM2P6_SURFACE_UVT,GRID_DATA #,ROOT
+from paths import CM2P6_SURFACE_1PCT_CO2_UVT,CM2P6_SURFACE_UVT,GRID_DATA 
 # conf['persist_path'] = ROOT#'/scratch/ag7531/'
-CACHE_FOLDER = OUTPUTS#'/scratch/ag7531/cm26_cache'
+# CACHE_FOLDER = '/scratch/ag7531/cm26_cache'
 
 # patch_data, grid_data = get_patch(CATALOG_URL, params.ntimes, params.bounds,
 #                                   params.CO2, 'usurf', 'vsurf')
