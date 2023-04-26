@@ -36,8 +36,10 @@ mlflow run -e peek . --env-manager local --experiment-name data_generation --run
 ```
 
 Creation of the slurm tasks are done with
+
 ```
-mlflow run -e data-test . --env-manager local --experiment-name data --run-name test
+mlflow run -e slurm-jobs . --env-manager local --experiment-name slurm_jobs_gen
 ```
+
 The jobs are saved to `slurm/jobs` the outputs are directed to `slurm/echo`. 
 To change the specifics of the `*.sbatch` files, edit `gz21/slurm/jobs.py`.
