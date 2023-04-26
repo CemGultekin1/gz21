@@ -47,7 +47,7 @@ def write_mlflow_slurm_job(
         f.write(sb)
         
 def main():
-    write_mlflow_slurm_job("peek","data_test","test","test",time = "10:00",mem = 4)
+    write_mlflow_slurm_job("data-test","data","test","test",time = "10:00",mem = 4)
     write_mlflow_slurm_job("data","data","full","datagen",time = "24:00:00",mem = 24)
     
         

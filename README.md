@@ -34,3 +34,10 @@ saved as artifacts similar to the data.
 ```
 mlflow run -e peek . --env-manager local --experiment-name data_generation --run-name peek
 ```
+
+Creation of the slurm tasks are done with
+```
+mlflow run -e data-test . --env-manager local --experiment-name data --run-name test
+```
+The jobs are saved to `slurm/jobs` the outputs are directed to `slurm/echo`. 
+To change the specifics of the `*.sbatch` files, edit `gz21/slurm/jobs.py`.

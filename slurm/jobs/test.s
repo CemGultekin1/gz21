@@ -13,6 +13,6 @@ module purge
 singularity exec --nv --overlay /scratch/cg3306/climate/subgrid/gz21/overlay-15GB-500K.ext3:ro\
 	 /scratch/work/public/singularity/cuda10.1-cudnn7-devel-ubuntu18.04.sif /bin/bash -c "
 		source /ext3/env.sh;
-		mlflow run -e peek . --env-manager local --experiment-name data_test --run-name test;
+		mlflow run -e data-test . --env-manager local --experiment-name data --run-name test;
 	"
 echo "$(date)"
