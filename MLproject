@@ -2,7 +2,7 @@ name: cmip2_6
 
 entry_points:
   main:
-    command: "python main.py"
+    command: "python gz21/main.py"
   data:
     parameters:
       ntimes : {type: float, default: 2}
@@ -14,4 +14,4 @@ entry_points:
       factor: {type: float, default: 4}
       chunk_size: {type: string, default: 50}
       global: {type: str, default: 1}
-    command: "python cmip26.py {lat_min} {lat_max} {long_min} {long_max} --CO2 {CO2} --ntimes {ntimes} --factor {factor} --chunk_size {chunk_size} --global_ {global}" 
+    command: "python gz21/cmip26.py {lat_min} {lat_max} {long_min} {long_max} --CO2 {CO2} --ntimes {ntimes} --factor {factor} --chunk_size {chunk_size} --global_ {global}" 

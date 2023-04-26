@@ -16,8 +16,9 @@ define newline
 
 endef
 
-SOURCE_TEXT= "\#!/bin/bash $(newline) source /ext3/miniconda3/etc/profile.d/conda.sh $(newline) export PATH=/ext3/miniconda3/bin:\$$PATH"
-
+SOURCE_TEXT= "\#!/bin/bash $(newline) source /ext3/miniconda3/etc/profile.d/conda.sh $(newline) export PATH=/ext3/miniconda3/bin:\$$PATH $(newline) export PYTHONPATH=\$$(pwd)"
+test:
+	echo $(SOURCE_TEXT)>test.txt
 setup-miniconda:
 	cp -rp $(GZPATH) .
 	gunzip $(GZFILE)
@@ -35,13 +36,13 @@ setup-miniconda:
 setup-conda-env: gz21/conda.yaml
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
-		conda env create -f environment_droplet.yml
+		conda env update --file environment_droplet.yml --prune
 	"
 
 setup-greene: 
 	make setup-miniconda
 	make setup-conda-env
-	echo $(pwd)>gz21/root.txt
+	echo $(pwd)>root.txt
 
 
 interactive-singularity-writing-permitted:	
