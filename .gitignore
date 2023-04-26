@@ -3,3 +3,4 @@ gz21/__pycache__/*
 *.ext3
 mlruns
 temp
+slurm
