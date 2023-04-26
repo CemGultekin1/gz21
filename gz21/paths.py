@@ -1,11 +1,11 @@
 import os
-def read_root():
-    with open('root.txt') as root_file:
-        x = root_file.readlines()[0]
-        x = x.strip()
-    return x
+# def read_root():
+#     with open('root.txt') as root_file:
+#         x = root_file.readlines()[0]
+#         x = x.strip()
+#     return x
 
-ROOT = read_root()
+ROOT = ''
 OUTPUTS = os.path.join(ROOT,'outputs')
 TEMP = os.path.join(ROOT,'temp')
 

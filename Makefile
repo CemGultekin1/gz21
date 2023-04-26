@@ -42,7 +42,6 @@ setup-conda-env: gz21/conda.yaml
 setup-greene: 
 	make setup-miniconda
 	make setup-conda-env
-	echo $(pwd)>root.txt
 
 
 interactive-singularity-writing-permitted:	
