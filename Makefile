@@ -57,7 +57,5 @@ interactive-singularity-read-only:
 	echo to deactivate conda environment \"conda deactivate\"
 	echo print \"exit\" to exit
 	singularity exec --overlay $(EXTFILE):ro $(CUDA_SINGULARITY) /bin/bash
-	
 
-.PHONY: setup-conda-env setup-miniconda create-root-txt
-.SILENT: setup-conda-env setup-miniconda create-root-txt interactive-singularity
+.SILENT: setup-conda-env setup-miniconda create-root-txt interactive-singularity-read-only interactive-singularity-writing-permitted setup-greene
