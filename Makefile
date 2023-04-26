@@ -40,8 +40,8 @@ setup-conda-env: environment_droplet.yml
 setup-greene: 
 	make setup-miniconda
 	make setup-conda-env
-	echo "EXTFILE = $(EXTFILE)">root.txt
-	echo "CUDA_SINGULARITY = $(CUDA_SINGULARITY)">>root.txt
+	echo "EXTFILE = $(EXTFILE)">made.txt
+	echo "CUDA_SINGULARITY = $(CUDA_SINGULARITY)">>made.txt
 
 interactive-singularity-writing-permitted:	
 	echo run \"source /ext3/env.sh\"
