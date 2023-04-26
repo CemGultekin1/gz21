@@ -41,6 +41,7 @@ setup-conda-env: code/conda.yaml
 setup-greene: 
 	make setup-miniconda
 	make setup-conda-env
+	echo $(pwd)>code/root.txt
 
 
 interactive-singularity-writing-permitted:	
@@ -57,8 +58,6 @@ interactive-singularity-read-only:
 	echo print \"exit\" to exit
 	singularity exec --overlay $(EXTFILE):ro $(CUDA_SINGULARITY) /bin/bash
 	
-test:
-	echo $(pwd)
 
 .PHONY: setup-conda-env setup-miniconda create-root-txt
 .SILENT: setup-conda-env setup-miniconda create-root-txt interactive-singularity

@@ -3,3 +3,6 @@ code/__pycache__/*
 *.pyc
 *.ext3
 outputs
+mlruns
+code/root.txt
+temp

@@ -1,6 +1,6 @@
 import os
 def read_root():
-    with open('root.txt') as root_file:
+    with open('code/root.txt') as root_file:
         x = root_file.readlines()[0]
         x = x.strip()
     return x

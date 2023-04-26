@@ -1,17 +1,17 @@
 name: cmip2_6
 
-# conda_env: conda.yaml
-
 entry_points:
   main:
+    command: "python main.py"
+  data:
     parameters:
-      ntimes : {type: float, default: 10000}
-      CO2: {type: float, default: 0}
+      ntimes : {type: float, default: 2}
+      CO2: {type: int, default: 0}
       lat_min : {type: float, default: -90}
       lat_max : {type: float, default: 90}
       long_min : {type: float, default: -360}
       long_max : {type: float, default: 360}
       factor: {type: float, default: 4}
       chunk_size: {type: string, default: 50}
-      global: {type: str, default: 0}
+      global: {type: str, default: 1}
     command: "python cmip26.py {lat_min} {lat_max} {long_min} {long_max} --CO2 {CO2} --ntimes {ntimes} --factor {factor} --chunk_size {chunk_size} --global_ {global}" 

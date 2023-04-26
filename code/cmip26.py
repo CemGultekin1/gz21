@@ -49,7 +49,7 @@ parser.add_argument('bounds', type=float, nargs=4, help='min lat, max_lat,\
                     min_long, max_long')
 parser.add_argument('--global_', type=int, help='True if global data. In this\
                     case the data is made cyclic along longitude', 
-                    default=False)
+                    default=1)
 parser.add_argument('--ntimes', type=int, default=10000, help='number of days,\
                     starting from first day.')
 parser.add_argument('--CO2', type=int, default=0, choices=[0, 1], help='CO2\
@@ -62,9 +62,8 @@ params = parser.parse_args()
 
 
 # Retrieve the patch of data specified in the command-line args
-patch_data, grid_data = get_patch_from_file(CATALOG_URL, params.ntimes, params.bounds,
-                                  params.CO2, 'usurf', 'vsurf')
-
+patch_data, grid_data = get_patch_from_file(params.ntimes, params.bounds,
+                                params.CO2, 'usurf', 'vsurf')
 logger.debug(patch_data)
 logger.debug(grid_data)
 
@@ -89,8 +88,8 @@ if params.factor != 0 and not debug_mode:
     def func(block):
         return eddy_forcing(block, grid_data, scale=scale_m)
     template = patch_data.coarsen(dict(xu_ocean=int(scale_m),
-                                       yu_ocean=int(scale_m)),
-                                  boundary='trim').mean()
+                                    yu_ocean=int(scale_m)),
+                                boundary='trim').mean()
     template2 = template.copy()
     template2 = template2.rename(dict(usurf='S_x', vsurf='S_y'))
     template = xr.merge((template, template2))
@@ -118,7 +117,7 @@ if not debug_mode:
 # Crop according to bounds
 bounds = params.bounds
 forcing = forcing.sel(xu_ocean=slice(bounds[2], bounds[3]),
-                      yu_ocean=slice(bounds[0], bounds[1]))
+                    yu_ocean=slice(bounds[0], bounds[1]))
 
 # chunk_sizes = list(map(int, params.chunk_size.split('/')))
 # while len(chunk_sizes) < 3:
@@ -129,6 +128,7 @@ forcing = forcing.sel(xu_ocean=slice(bounds[2], bounds[3]),
 logger.info('Preparing forcing data')
 logger.debug(forcing)
 # export data
+print(f"data_location = {data_location}")
 forcing.to_zarr(join(data_location, 'forcing'), mode='w')
 
 # Log as an artifact the forcing data
