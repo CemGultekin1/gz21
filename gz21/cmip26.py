@@ -24,12 +24,14 @@ import logging
 import tempfile
 
 def main():
-    logging_level = os.environ.get('LOGGING_LEVEL')
-    if logging_level is not None:
-        logging_level = getattr(logging, logging_level)
-        logging.basicConfig(level=logging_level)
+    # logging_level = os.environ.get('LOGGING_LEVEL')
+    
+    # if logging_level is not None:
+    #     logging_level = getattr(logging, logging_level)
+    #     logging.basicConfig(level=logging_level)
     logger = logging.getLogger(__name__)
-
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    
 
 
     DESCRIPTION = 'Read data from the CM2.6 and \

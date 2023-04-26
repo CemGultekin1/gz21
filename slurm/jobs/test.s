@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=10:00
 #SBATCH --array=1
-#SBATCH --mem=4
+#SBATCH --mem=12GB
 #SBATCH --job-name=test
 #SBATCH --output=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/test_%A_%a.out
 #SBATCH --error=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/test_%A_%a.err

@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 #SBATCH --array=1
-#SBATCH --mem=24
+#SBATCH --mem=32GB
 #SBATCH --job-name=datagen
 #SBATCH --output=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/datagen_%A_%a.out
 #SBATCH --error=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/datagen_%A_%a.err

@@ -16,6 +16,11 @@ class SlurmJobHeaders:
     def __post_init__(self,):
         self.output = os.path.join(self.output,self.job_name+"_%A_%a.out")
         self.error = os.path.join(self.error,self.job_name+"_%A_%a.err")
+        keys = tuple(self.__dict__.keys())
+        for key in keys:
+            self.__dict__[key] = str(self.__dict__[key])
+        if "GB" not in self.mem:
+            self.mem+="GB"
     def __repr__(self,):        
         st = "\n".join([f"#SBATCH --{key.replace('_','-')}={val}" for key,val in self.__dict__.items()])
         return "#!/bin/bash\n" + st
@@ -47,8 +52,8 @@ def write_mlflow_slurm_job(
         f.write(sb)
         
 def main():
-    write_mlflow_slurm_job("data-test","data","test","test",time = "10:00",mem = 4)
-    write_mlflow_slurm_job("data","data","full","datagen",time = "24:00:00",mem = 24)
+    write_mlflow_slurm_job("data-test","data","test","test",time = "10:00",mem = 12)
+    write_mlflow_slurm_job("data","data","full","datagen",time = "48:00:00",mem = 32)
     
         
 if __name__ == '__main__':
