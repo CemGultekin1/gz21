@@ -33,7 +33,7 @@ setup-miniconda:
 		rm -rf $(GZFILE);
 	"
 	
-setup-conda-env: gz21/conda.yaml
+setup-conda-env: environment_droplet.yml
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
 		conda env update --file environment_droplet.yml --prune
