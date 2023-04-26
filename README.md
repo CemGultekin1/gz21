@@ -7,5 +7,7 @@ To use the singularity in a read only mode
 Or to use it with writing permits
 `make interactive-singularity-writing-permitted`
 Once inside the singularity, employ `pangeo` using
-`source /ext3/env.sh`
-`conda activate pangeo`
+```
+source /ext3/env.sh
+conda activate pangeo
+```
