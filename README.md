@@ -20,7 +20,7 @@ conda activate pangeo
 ```
 It should look like `(pangeo) Singularity> `. We can now use `mlflow` with the processes defined in `code/MLproject`
 
-For a test, the following will coarse-grain high resolution data and save coarse-grid variables into `temp`.
+For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables into `temp` under a random folder name.
 
 ```
 mlflow run code --env-manager local
