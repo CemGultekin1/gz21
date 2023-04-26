@@ -1,8 +1,7 @@
-gz21/mlruns/*
 gz21/__pycache__/*
 *.pyc
 *.ext3
 outputs
 mlruns
-gz21/root.txt
 temp
+gz21/root.txt
