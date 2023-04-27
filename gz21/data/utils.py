@@ -7,7 +7,7 @@ Created on Tue May 12 17:40:39 2020
 """
 import mlflow
 import xarray as xr
-import yaml
+from yaml import Loader, Dumper,load
 from mlflow import MlflowClient
 def find_latest_data_run()->dict:
     experiment_name = "data"
@@ -35,7 +35,7 @@ def load_training_datasets(ds: xr.Dataset, config_fname: str):
     results = []
     with open(config_fname) as f:
         try:
-            subdomains = yaml.load(f)
+            subdomains = load(f,Loader)#yaml.load(f)
         except FileNotFoundError as e:
             raise type(e)('Configuration file of subdomains not found')
         for subdomain in subdomains:

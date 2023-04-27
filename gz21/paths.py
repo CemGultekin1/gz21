@@ -12,11 +12,10 @@ def read_made_dictionary():
 files = read_made_dictionary()
 SLURM_JOBS = os.path.abspath('slurm/jobs')
 SLURM_ECHO = os.path.abspath('slurm/echo')
-
-if not os.path.exists(SLURM_JOBS):
-    os.makedirs(SLURM_JOBS)
-if not os.path.exists(SLURM_ECHO):
-    os.makedirs(SLURM_ECHO)
+TEMP = os.path.abspath('temp')
+for directory in [TEMP,SLURM_ECHO,SLURM_JOBS]:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     
 
 EXT3 = os.path.abspath(files['EXTFILE'])

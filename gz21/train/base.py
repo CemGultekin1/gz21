@@ -43,7 +43,7 @@ class Trainer:
         self._device = device
         self._criterion = MSELoss()
         self._metrics = dict()
-        self._print_loss_every = 20
+        self._print_loss_every = 1#20
         self._locked = False
         self._early_stopping = 4
         self._best_test_loss = None

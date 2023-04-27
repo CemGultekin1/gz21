@@ -13,6 +13,7 @@ from os.path import join
 import os
 
 import argparse
+from gz21.paths import TEMP
 import xarray as xr
 from dask.diagnostics import ProgressBar
 import mlflow
@@ -124,13 +125,15 @@ def main():
     logger.info('Preparing forcing data')
     logger.debug(forcing)
     # export data
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        print(f"data_location = {tmpdirname}")
-        forcing.to_zarr(join(tmpdirname, 'forcing.zarr'), mode='w')
-        # Log as an artifact the forcing data
-        logger.info('Logging processed dataset as an artifact...')
-        mlflow.log_artifact(join(tmpdirname, 'forcing.zarr'))
-        logger.info('Completed...')
+    
+    tmpdirname = tempfile.mkdtemp(dir=TEMP)
+    # with tempfile.TemporaryDirectory() as tmpdirname:
+    print(f"data_location = {tmpdirname}")
+    forcing.to_zarr(join(tmpdirname, 'forcing.zarr'), mode='w')
+    # Log as an artifact the forcing data
+    logger.info('Logging processed dataset as an artifact...')
+    mlflow.log_artifact(join(tmpdirname, 'forcing.zarr'))
+    logger.info('Completed...')
     
     
 if __name__ == '__main__':
