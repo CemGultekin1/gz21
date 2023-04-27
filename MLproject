@@ -4,7 +4,7 @@ entry_points:
   peek:
     command: "python gz21/plots/peek.py"
   slurm-jobs:
-    command: "python gz21/slurm/jobs.py"
+    command: "python gz21/sjobs/jobs.py"
   data-test:
     parameters:
       ntimes : {type: int, default: 32}
