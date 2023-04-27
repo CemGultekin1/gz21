@@ -20,7 +20,7 @@ from paths import CM2P6_SURFACE_1PCT_CO2_UVT,CM2P6_SURFACE_UVT,GRID_DATA
 
 def get_patch_from_file(ntimes:int = None,bounds:list = None,cO2_level=0,*selected_vars):
     path = CM2P6_SURFACE_UVT if cO2_level == 0 else CM2P6_SURFACE_1PCT_CO2_UVT
-    uv_data = xr.open_zarr(path)
+    uv_data = xr.open_zarr(path,overwrite_encoded_chunks = True,)#chunks = dict(time = 16))
     grid_data = xr.open_dataset(GRID_DATA)
     grid_data = grid_data.reset_coords()[['dxu', 'dyu']]#[['dxu', 'dyu', 'wet']]
     if bounds is not None:

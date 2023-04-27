@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --time=10:00
 #SBATCH --array=1
-#SBATCH --mem=12GB
+#SBATCH --mem=16GB
 #SBATCH --job-name=test
 #SBATCH --output=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/test_%A_%a.out
 #SBATCH --error=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/test_%A_%a.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=2
 echo "$(date)"
 module purge
 singularity exec --nv --overlay /scratch/cg3306/climate/subgrid/gz21/overlay-15GB-500K.ext3:ro\

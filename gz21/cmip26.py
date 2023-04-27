@@ -22,7 +22,6 @@ from data.coarse import eddy_forcing
 from data.pangeo_catalog import get_patch_from_file
 import logging
 import tempfile
-
 def main():
     # logging_level = os.environ.get('LOGGING_LEVEL')
     
@@ -30,7 +29,7 @@ def main():
     #     logging_level = getattr(logging, logging_level)
     #     logging.basicConfig(level=logging_level)
     logger = logging.getLogger(__name__)
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
     
 
 
@@ -70,8 +69,9 @@ def main():
         patch_data = cyclize_dataset(patch_data, 'xu_ocean', params.factor)
         grid_data = cyclize_dataset(grid_data, 'xu_ocean', params.factor)
         # Rechunk along the cyclized dimension
-        patch_data = patch_data.chunk(dict(xu_ocean=-1))
-        grid_data = grid_data.chunk(dict(xu_ocean=-1))
+        
+        patch_data  = patch_data.chunk(chunks = dict(time = (8),xu_ocean = (-1)))
+        # grid_data = grid_data.chunk(xu_oc
 
     logger.debug('Getting grid data locally')
     # grid data is saved locally, no need for dask
@@ -84,15 +84,18 @@ def main():
         scale_m = params.factor
         def func(block):
             return eddy_forcing(block, grid_data, scale=scale_m)
+        def grouped_func(block):
+            return eddy_forcing(block.groupby("time"), grid_data, scale=scale_m)
+        
         template = patch_data.coarsen(dict(xu_ocean=int(scale_m),
                                         yu_ocean=int(scale_m)),
                                     boundary='trim').mean()
         template2 = template.copy()
         template2 = template2.rename(dict(usurf='S_x', vsurf='S_y'))
         template = xr.merge((template, template2))
-        forcing = xr.map_blocks(func, patch_data, template=template)
-        # forcing = eddy_forcing(patch_data, grid_data, scale=scale_m, method='mean',
-        #                        scale_mode='factor')
+        
+        forcing = xr.map_blocks(grouped_func, patch_data, template=template,)
+        forcing = forcing.chunk(dict(time = (-1)))
     elif not debug_mode:
         scale_m = params.scale * 1e3
         forcing = eddy_forcing(patch_data, grid_data, scale=scale_m, method='mean')
@@ -116,21 +119,15 @@ def main():
     forcing = forcing.sel(xu_ocean=slice(bounds[2], bounds[3]),
                         yu_ocean=slice(bounds[0], bounds[1]))
 
-    # chunk_sizes = list(map(int, params.chunk_size.split('/')))
-    # while len(chunk_sizes) < 3:
-    #     chunk_sizes.append('auto')
-    # forcing = forcing.chunk(dict(zip(('time', 'xu_ocean', 'yu_ocean'),
-    #                                  chunk_sizes)))
-
     logger.info('Preparing forcing data')
     logger.debug(forcing)
     # export data
     with tempfile.TemporaryDirectory() as tmpdirname:
         print(f"data_location = {tmpdirname}")
-        forcing.to_zarr(join(tmpdirname, 'forcing'), mode='w')
+        forcing.to_zarr(join(tmpdirname, 'forcing.zarr'), mode='w')
         # Log as an artifact the forcing data
         logger.info('Logging processed dataset as an artifact...')
-        mlflow.log_artifact(join(tmpdirname, 'forcing'))
+        mlflow.log_artifact(join(tmpdirname, 'forcing.zarr'))
         logger.info('Completed...')
     
     

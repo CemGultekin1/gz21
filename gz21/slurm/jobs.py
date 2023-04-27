@@ -52,8 +52,8 @@ def write_mlflow_slurm_job(
         f.write(sb)
         
 def main():
-    write_mlflow_slurm_job("data-test","data","test","test",time = "10:00",mem = 12)
-    write_mlflow_slurm_job("data","data","full","datagen",time = "48:00:00",mem = 32)
+    write_mlflow_slurm_job("data-test","data","test","test",time = "10:00",mem = 16,cpus_per_task = 2)
+    write_mlflow_slurm_job("data","data","full","datagen",time = "48:00:00",mem = 100,cpus_per_task = 8)
     
         
 if __name__ == '__main__':

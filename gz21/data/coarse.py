@@ -144,7 +144,7 @@ def eddy_forcing(u_v_dataset : xr.Dataset, grid_data: xr.Dataset,
     if nan_or_zero == 'zero':
         u_v_dataset = u_v_dataset.fillna(0.0)
     if scale_mode == 'factor':
-        print('Using factor mode')
+        # print('Using factor mode')
         scale_x = scale
         scale_y = scale
     # Interpolate temperature
@@ -167,9 +167,9 @@ def eddy_forcing(u_v_dataset : xr.Dataset, grid_data: xr.Dataset,
     forcing = forcing.rename({'adv_x': 'S_x', 'adv_y': 'S_y'})
     # Merge filtered u,v, temperature and forcing terms
     forcing = forcing.merge(u_v_filtered)
-    logging.debug(forcing)
+    # logging.debug(forcing)
     # Coarsen
-    print('scale factor: ', scale)
+    # print('scale factor: ', scale)
     forcing_coarse = forcing.coarsen({'xu_ocean': int(scale_x),
                                       'yu_ocean': int(scale_y)},
                                      boundary='trim')

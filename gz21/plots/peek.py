@@ -10,12 +10,12 @@ def main():
     client = MlflowClient()
 
     # Retrieve Experiment information
-    experiment = client.get_experiment_by_name('data_generation')
+    experiment = client.get_experiment_by_name('data')
     runs = {run.info.run_name:run for run in client.search_runs(experiment.experiment_id)}
     run = runs['test']
     data_address = run.info.artifact_uri
 
-    path = os.path.join(data_address,'forcing')
+    path = os.path.join(data_address,'forcing.zarr')
     ds = xr.open_zarr(path)
     with tempfile.TemporaryDirectory() as tmpdirname:
         temploc = os.path.join(tmpdirname,'peek')

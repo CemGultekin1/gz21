@@ -7,7 +7,7 @@ entry_points:
     command: "python gz21/slurm/jobs.py"
   data-test:
     parameters:
-      ntimes : {type: int, default: 1}
+      ntimes : {type: int, default: 32}
       CO2: {type: int, default: 0}
       lat_min : {type: float, default: -90}
       lat_max : {type: float, default: 90}
