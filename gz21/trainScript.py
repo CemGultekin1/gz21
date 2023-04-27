@@ -25,7 +25,7 @@ from data.datasets import (DatasetWithTransform, DatasetTransformer,
 # Some utils functions
 from train.utils import (DEVICE_TYPE, learning_rates_from_string,
                          run_ids_from_string, list_from_string)
-from data.utils import load_training_datasets, load_data_from_run
+from data.utils import load_training_datasets, load_data_from_run,find_latest_data_run
 from testing.utils import create_test_dataset
 from testing.metrics import MSEMetric, MaxMetric
 from train.base import Trainer
@@ -53,14 +53,17 @@ def negative_int(value: str):
 def check_str_is_None(s: str):
     return None if s.lower() == 'none' else s
 
+
+rundict = find_latest_data_run()
+
 # PARAMETERS ---------
 description = 'Trains a model on a chosen dataset from the store. Allows \
     to set training parameters via the CLI.'
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('exp_id', type=int,
+parser.add_argument('exp_id', type=str,default = rundict['experiment_id'],
                     help='Experiment id of the source dataset containing the '\
                     'training data.')
-parser.add_argument('run_id', type=str,
+parser.add_argument('run_id', type=str,default = rundict['run_id'],
                     help='Run id of the source dataset')
 parser.add_argument('--batchsize', type=int, default=8)
 parser.add_argument('--n_epochs', type=int, default=100)
@@ -163,6 +166,9 @@ print('Selected device type: ', device_type.value)
 global_ds = load_data_from_run(params.run_id)
 # Load data from the store, according to experiment id and run id
 xr_datasets = load_training_datasets(global_ds, 'training_subdomains.yaml')
+
+print(xr_datasets)
+raise Exception
 # Split into train and test datasets
 datasets, train_datasets, test_datasets = list(), list(), list()
 

@@ -8,10 +8,18 @@ Created on Tue May 12 17:40:39 2020
 import mlflow
 import xarray as xr
 import yaml
+from mlflow import MlflowClient
+def find_latest_data_run()->dict:
+    experiment_name = "data"
+    runs = mlflow.search_runs(
+            experiment_names=[experiment_name],
+            filter_string = "tags.mlflow.runName = 'test'"
+    )
+    return runs.loc[len(runs)-1].to_dict()
+
 
 def load_data_from_run(run_id):
-    # mlflow_client = mlflow.tracking.MlflowClient()
-    data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing")
+    data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing.zarr")
     xr_dataset = xr.open_zarr(data_file)
     return xr_dataset
 

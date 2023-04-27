@@ -54,6 +54,8 @@ def main():
                         help='Factor of degrading. Should be integer > 1.')
     parser.add_argument('--chunk_size', type=str, default='50',
                         help='Chunk size along the time dimension')
+    parser.add_argument('--num_cpus', type=str, default='2',
+                        help='Number of cpus used.')
     params = parser.parse_args()
 
 
@@ -69,8 +71,8 @@ def main():
         patch_data = cyclize_dataset(patch_data, 'xu_ocean', params.factor)
         grid_data = cyclize_dataset(grid_data, 'xu_ocean', params.factor)
         # Rechunk along the cyclized dimension
-        
-        patch_data  = patch_data.chunk(chunks = dict(time = (8),xu_ocean = (-1)))
+        print(f'patch_data  = patch_data.chunk(chunks = dict(time = ({int(params.num_cpus)}),xu_ocean = (-1)))')
+        patch_data  = patch_data.chunk(chunks = dict(time = (int(params.num_cpus)),xu_ocean = (-1)))
         # grid_data = grid_data.chunk(xu_oc
 
     logger.debug('Getting grid data locally')
