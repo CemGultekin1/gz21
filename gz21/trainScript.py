@@ -11,7 +11,7 @@ import os.path
 import tempfile
 
 
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 import torch.nn
