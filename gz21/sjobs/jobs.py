@@ -60,7 +60,7 @@ def main():
     write_mlflow_slurm_job("data-test","data","test","data_test",time = "10:00",mem = 16,cpus_per_task = 2)
     write_mlflow_slurm_job("data","data","full","datagen",time = "24:00:00",mem = 200,cpus_per_task = 4)
     write_mlflow_slurm_job("train","train","test","train_test",time = "24:00:00",mem = 60,cpus_per_task = 1)
-    write_mlflow_slurm_job("train","train","full","train",time = "24:00:00",mem = 60,cpus_per_task = 1,gres = "gpu:1")
+    write_mlflow_slurm_job("train","train","full","train",time = "24:00:00",mem = 60,cpus_per_task = 8,gres = "gpu:1")
     
         
 if __name__ == '__main__':

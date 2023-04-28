@@ -41,7 +41,7 @@ entry_points:
       train_split : {type : float, default : 0.8}
       test_split : {type : float, default : 0.8}
       time_indices : {type : string, default : 0}
-      print_every : {type : float, default : 1}
+      print_every : {type : float, default : 20}
       weight_decay : {type : float, default : 0.01}
       model_module_name : {type : string, default : models.models1}
       model_cls_name : {type : string, default : FullyCNN}
