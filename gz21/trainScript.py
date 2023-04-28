@@ -56,16 +56,16 @@ def check_str_is_None(s: str):
     return None if s.lower() == 'none' else s
 
 
-rundict = find_latest_data_run()
+# rundict = find_latest_data_run()
 
 # PARAMETERS ---------
 description = 'Trains a model on a chosen dataset from the store. Allows \
     to set training parameters via the CLI.'
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('--exp_id', type=str,default = rundict['experiment_id'],
+parser.add_argument('--exp_id', type=str,default = 0,#rundict['experiment_id'],
                     help='Experiment id of the source dataset containing the '\
                     'training data.')
-parser.add_argument('--run_id', type=str,default = rundict['run_id'],
+parser.add_argument('--run_id', type=str,default = 0,#rundict['run_id'],
                     help='Run id of the source dataset')
 parser.add_argument('--batchsize', type=int, default=8)
 parser.add_argument('--n_epochs', type=int, default=100)
