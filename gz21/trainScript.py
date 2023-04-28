@@ -217,7 +217,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._lazy_init_flag = False
         self._transform_from_model_flag = False
         self._model = None
-        self._length = get_length(varname)
+        self._length = 2#get_length(varname)
         self._subset = None
     def add_transforms_from_model(self,model):
         self._model = model
@@ -341,10 +341,12 @@ for i_epoch in range(n_epochs):
     if test == 'EARLY_STOPPING':
         print(test)
         break
+        
     test_loss, metrics_results = test
     # Log the training loss
     print('Train loss for this epoch is ', train_loss)
     print('Test loss for this epoch is ', test_loss)
+    print('Learning rate ', optimizer.param_groups[0]['lr'])
 
     for metric_name, metric_value in metrics_results.items():
         print('Test {} for this epoch is {}'.format(metric_name, metric_value))
