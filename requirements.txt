@@ -1,150 +1,126 @@
-alembic==1.10.4
-asciitree==0.3.3
-asttokens==2.2.1
-backcall==0.2.0
-blinker==1.6.2
-bokeh==3.1.0
-boltons @ file:///croot/boltons_1677628692245/work
-Bottleneck==1.3.7
-brotlipy==0.7.0
-certifi @ file:///croot/certifi_1671487769961/work/certifi
-cffi @ file:///croot/cffi_1670423208954/work
-cftime==1.6.2
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
-click==8.1.3
-cloudpickle==2.2.1
-cmake==3.26.3
-conda==23.3.1
-conda-content-trust @ file:///tmp/abs_5952f1c8-355c-4855-ad2e-538535021ba5h26t22e5/croots/recipe/conda-content-trust_1658126371814/work
-conda-package-handling @ file:///croot/conda-package-handling_1672865015732/work
-conda_package_streaming @ file:///croot/conda-package-streaming_1670508151586/work
-contourpy==1.0.7
-cryptography @ file:///croot/cryptography_1677533068310/work
-cycler==0.11.0
-dask==2023.4.0
-databricks-cli==0.17.6
-decorator==5.1.1
-distributed==2023.4.0
-docker==6.0.1
-docopt==0.6.2
-entrypoints==0.4
-executing==1.2.0
-fasteners==0.18
-filelock==3.12.0
-Flask==2.3.1
-flox==0.6.10
-fonttools==4.39.3
-fsspec==2023.4.0
-gitdb==4.0.10
-GitPython==3.1.31
-greenlet==2.0.2
-gunicorn==20.1.0
-h5netcdf==1.1.0
-h5py==3.8.0
-idna @ file:///croot/idna_1666125576474/work
-importlib-metadata==6.6.0
-install==1.3.5
-ipython==8.12.0
-itsdangerous==2.1.2
-jedi==0.18.2
-Jinja2==3.1.2
-joblib==1.2.0
-jsonpatch @ file:///tmp/build/80754af9/jsonpatch_1615747632069/work
-jsonpointer==2.1
-kiwisolver==1.4.4
-lit==16.0.2
-llvmlite==0.39.1
-locket==1.0.0
-lz4==4.3.2
-Mako==1.2.4
-Markdown==3.4.3
-MarkupSafe==2.1.2
-matplotlib==3.7.1
-matplotlib-inline==0.1.6
-mlflow==2.3.0
-mpmath==1.3.0
-msgpack==1.0.5
-nc-time-axis==1.4.1
-netCDF4==1.6.3
-networkx==3.1
-numba==0.56.4
-numbagg==0.2.2
-numcodecs==0.11.0
-numpy==1.23.5
-numpy-groupies==0.9.20
-nvidia-cublas-cu11==11.10.3.66
-nvidia-cuda-cupti-cu11==11.7.101
-nvidia-cuda-nvrtc-cu11==11.7.99
-nvidia-cuda-runtime-cu11==11.7.99
-nvidia-cudnn-cu11==8.5.0.96
-nvidia-cufft-cu11==10.9.0.58
-nvidia-curand-cu11==10.2.10.91
-nvidia-cusolver-cu11==11.4.0.1
-nvidia-cusparse-cu11==11.7.4.91
-nvidia-nccl-cu11==2.14.3
-nvidia-nvtx-cu11==11.7.91
-oauthlib==3.2.2
-packaging @ file:///croot/packaging_1678965309396/work
-pandas==2.0.1
-parso==0.8.3
-partd==1.4.0
-pexpect==4.8.0
-pickleshare==0.7.5
-Pillow==9.5.0
-pipreqs==0.4.13
-platformdirs==3.3.0
-pluggy @ file:///tmp/build/80754af9/pluggy_1648024709248/work
-pooch==1.7.0
-progressbar==2.5
-prompt-toolkit==3.0.38
-protobuf==4.22.3
-psutil==5.9.5
-ptyprocess==0.7.0
-pure-eval==0.2.2
-pyarrow==11.0.0
-pycosat @ file:///croot/pycosat_1666805502580/work
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
-Pygments==2.15.1
-PyJWT==2.6.0
-pyOpenSSL @ file:///croot/pyopenssl_1677607685877/work
-pyparsing==3.0.9
-PySocks @ file:///home/builder/ci_310/pysocks_1640793678128/work
-python-dateutil==2.8.2
-pytz==2023.3
-PyYAML==6.0
-querystring-parser==1.2.4
-requests @ file:///croot/requests_1678709721434/work
-ruamel.yaml @ file:///croot/ruamel.yaml_1666304550667/work
-ruamel.yaml.clib @ file:///croot/ruamel.yaml.clib_1666302247304/work
-scikit-learn==1.2.2
-scipy==1.10.1
-seaborn==0.12.2
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-smmap==5.0.0
-sortedcontainers==2.4.0
-SQLAlchemy==2.0.10
-sqlparse==0.4.4
-stack-data==0.6.2
-sympy==1.11.1
-tabulate==0.9.0
-tblib==1.7.0
-threadpoolctl==3.1.0
-toolz @ file:///croot/toolz_1667464077321/work
-torch==2.0.0
-tornado==6.3.1
-tqdm @ file:///croot/tqdm_1679561862951/work
-traitlets==5.9.0
-triton==2.0.0
-typing_extensions==4.5.0
-tzdata==2023.3
-urllib3 @ file:///croot/urllib3_1680254681959/work
-wcwidth==0.2.6
-websocket-client==1.5.1
-Werkzeug==2.3.0
-xarray==2023.4.2
-xyzservices==2023.2.0
-yarg==0.1.9
-zarr==2.14.2
-zict==3.0.0
-zipp==3.15.0
-zstandard @ file:///croot/zstandard_1677013143055/work
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: linux-64
+_libgcc_mutex=0.1=main
+_openmp_mutex=5.1=1_gnu
+alembic=1.10.4=pypi_0
+asciitree=0.3.3=pypi_0
+blinker=1.6.2=pypi_0
+bokeh=3.1.0=pypi_0
+boltons=23.0.0=py310h06a4308_0
+bottleneck=1.3.7=pypi_0
+brotlipy=0.7.0=py310h7f8727e_1002
+bzip2=1.0.8=h7b6447c_0
+ca-certificates=2023.01.10=h06a4308_0
+certifi=2022.12.7=py310h06a4308_0
+cffi=1.15.1=py310h5eee18b_3
+cftime=1.6.2=pypi_0
+charset-normalizer=2.0.4=pyhd3eb1b0_0
+click=8.1.3=pypi_0
+cloudpickle=2.2.1=pypi_0
+conda=23.3.1=py310h06a4308_0
+conda-content-trust=0.1.3=py310h06a4308_0
+conda-package-handling=2.0.2=py310h06a4308_0
+conda-package-streaming=0.7.0=py310h06a4308_0
+cryptography=39.0.1=py310h9ce1e76_0
+dask=2023.4.0=pypi_0
+databricks-cli=0.17.6=pypi_0
+distributed=2023.4.0=pypi_0
+docker=6.0.1=pypi_0
+entrypoints=0.4=pypi_0
+fasteners=0.18=pypi_0
+flask=2.3.1=pypi_0
+flox=0.6.10=pypi_0
+fsspec=2023.4.0=pypi_0
+gitdb=4.0.10=pypi_0
+gitpython=3.1.31=pypi_0
+greenlet=2.0.2=pypi_0
+gunicorn=20.1.0=pypi_0
+h5netcdf=1.1.0=pypi_0
+h5py=3.8.0=pypi_0
+idna=3.4=py310h06a4308_0
+importlib-metadata=6.6.0=pypi_0
+install=1.3.5=pypi_0
+itsdangerous=2.1.2=pypi_0
+jinja2=3.1.2=pypi_0
+joblib=1.2.0=pypi_0
+jsonpatch=1.32=pyhd3eb1b0_0
+jsonpointer=2.1=pyhd3eb1b0_0
+ld_impl_linux-64=2.38=h1181459_1
+libffi=3.4.2=h6a678d5_6
+libgcc-ng=11.2.0=h1234567_1
+libgomp=11.2.0=h1234567_1
+libstdcxx-ng=11.2.0=h1234567_1
+libuuid=1.41.5=h5eee18b_0
+llvmlite=0.39.1=pypi_0
+locket=1.0.0=pypi_0
+lz4=4.3.2=pypi_0
+mako=1.2.4=pypi_0
+markdown=3.4.3=pypi_0
+markupsafe=2.1.2=pypi_0
+mlflow=2.3.0=pypi_0
+msgpack=1.0.5=pypi_0
+nc-time-axis=1.4.1=pypi_0
+ncurses=6.4=h6a678d5_0
+netcdf4=1.6.3=pypi_0
+numba=0.56.4=pypi_0
+numbagg=0.2.2=pypi_0
+numcodecs=0.11.0=pypi_0
+numpy=1.23.5=pypi_0
+numpy-groupies=0.9.20=pypi_0
+oauthlib=3.2.2=pypi_0
+openssl=1.1.1t=h7f8727e_0
+packaging=23.0=py310h06a4308_0
+pandas=2.0.1=pypi_0
+partd=1.4.0=pypi_0
+pip=23.0.1=py310h06a4308_0
+platformdirs=3.3.0=pypi_0
+pluggy=1.0.0=py310h06a4308_1
+pooch=1.7.0=pypi_0
+protobuf=4.22.3=pypi_0
+psutil=5.9.5=pypi_0
+pyarrow=11.0.0=pypi_0
+pycosat=0.6.4=py310h5eee18b_0
+pycparser=2.21=pyhd3eb1b0_0
+pyjwt=2.6.0=pypi_0
+pyopenssl=23.0.0=py310h06a4308_0
+pysocks=1.7.1=py310h06a4308_0
+python=3.10.10=h7a1cb2a_2
+pytz=2023.3=pypi_0
+pyyaml=6.0=pypi_0
+querystring-parser=1.2.4=pypi_0
+readline=8.2=h5eee18b_0
+requests=2.28.1=py310h06a4308_1
+ruamel.yaml=0.17.21=py310h5eee18b_0
+ruamel.yaml.clib=0.2.6=py310h5eee18b_1
+scikit-learn=1.2.2=pypi_0
+scipy=1.10.1=pypi_0
+seaborn=0.12.2=pypi_0
+setuptools=65.6.3=py310h06a4308_0
+six=1.16.0=pyhd3eb1b0_1
+smmap=5.0.0=pypi_0
+sortedcontainers=2.4.0=pypi_0
+sqlalchemy=2.0.10=pypi_0
+sqlite=3.41.2=h5eee18b_0
+sqlparse=0.4.4=pypi_0
+tabulate=0.9.0=pypi_0
+tblib=1.7.0=pypi_0
+threadpoolctl=3.1.0=pypi_0
+tk=8.6.12=h1ccaba5_0
+toolz=0.12.0=py310h06a4308_0
+tornado=6.3.1=pypi_0
+tqdm=4.65.0=py310h2f386ee_0
+typing-extensions=4.5.0=pypi_0
+tzdata=2023.3=pypi_0
+urllib3=1.26.15=py310h06a4308_0
+websocket-client=1.5.1=pypi_0
+werkzeug=2.3.0=pypi_0
+wheel=0.38.4=py310h06a4308_0
+xarray=2023.4.2=pypi_0
+xyzservices=2023.2.0=pypi_0
+xz=5.2.10=h5eee18b_1
+zarr=2.14.2=pypi_0
+zict=3.0.0=pypi_0
+zipp=3.15.0=pypi_0
+zlib=1.2.13=h5eee18b_0
+zstandard=0.19.0=py310h5eee18b_0
