@@ -26,6 +26,7 @@ into `mlruns/<experiment_id>/<run_id>/artifacts/forcing/`.
 ```
 mlflow run -e data-test . --env-manager local --experiment-name data_generation --run-name test
 ```
+
 Above `--env-manager local` ensures the locally existing environment is used. 
 To access the generated data, the above entered params `experiment_name` and `run_name` can be used as provided in `peek.py`. 
 Inside `MLproject`, `peek` is another entry point which plots `time=0` fields of the data. The plots are 
@@ -43,3 +44,9 @@ mlflow run -e slurm-jobs . --env-manager local --experiment-name slurm_jobs_gen
 
 The jobs are saved to `slurm/jobs` the outputs are directed to `slurm/echo`. 
 To change the specifics of the `*.sbatch` files, edit `gz21/slurm/jobs.py`.
+
+To run a training job use 
+
+```
+mlflow run -e train . --env-manager local --experiment-name train --run-name full;
+```
