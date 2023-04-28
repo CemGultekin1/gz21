@@ -32,7 +32,7 @@ setup-miniconda:
 		rm -rf $(GZFILE);
 	"
 	
-setup-conda-env: environment_droplet.yml
+setup-conda-env:
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
 		pip install -r requirements.txt;
