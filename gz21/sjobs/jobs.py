@@ -13,16 +13,21 @@ class SlurmJobHeaders:
     nodes:str = 1
     ntasks_per_node:str = 1
     cpus_per_task :str = 1    
+    gres:str = "none"
     def __post_init__(self,):
         self.output = os.path.join(self.output,self.job_name+"_%A_%a.out")
         self.error = os.path.join(self.error,self.job_name+"_%A_%a.err")
+        
         keys = tuple(self.__dict__.keys())
         for key in keys:
             self.__dict__[key] = str(self.__dict__[key])
         if "GB" not in self.mem:
             self.mem+="GB"
     def __repr__(self,):        
-        st = "\n".join([f"#SBATCH --{key.replace('_','-')}={val}" for key,val in self.__dict__.items()])
+        stt = [(key,val) for key,val in self.__dict__.items() if key != "gres"]
+        if self.gres != "none":
+            stt.append(("gres",self.gres))
+        st = "\n".join([f"#SBATCH --{key.replace('_','-')}={val}" for key,val in stt])
         return "#!/bin/bash\n" + st
     @property
     def file_name(self,)->str:
@@ -52,8 +57,10 @@ def write_mlflow_slurm_job(
         f.write(sb)
         
 def main():
-    write_mlflow_slurm_job("data-test","data","test","test",time = "10:00",mem = 16,cpus_per_task = 2)
+    write_mlflow_slurm_job("data-test","data","test","data_test",time = "10:00",mem = 16,cpus_per_task = 2)
     write_mlflow_slurm_job("data","data","full","datagen",time = "24:00:00",mem = 200,cpus_per_task = 4)
+    write_mlflow_slurm_job("train","train","test","train_test",time = "24:00:00",mem = 60,cpus_per_task = 1)
+    write_mlflow_slurm_job("train","train","full","train",time = "24:00:00",mem = 60,cpus_per_task = 1,gres = "gpu:1")
     
         
 if __name__ == '__main__':

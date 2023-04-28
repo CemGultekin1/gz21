@@ -13,10 +13,24 @@ def find_latest_data_run()->dict:
     experiment_name = "data"
     runs = mlflow.search_runs(
             experiment_names=[experiment_name],
-            filter_string = "tags.mlflow.runName = 'test'"
+            filter_string = "tags.mlflow.runName = 'full'"
     )
     return runs.loc[len(runs)-1].to_dict()
 
+def load_data_from_past():
+    data_file = '/scratch/zanna/data/cm2.6/coarse_datasets/coarse_4_surface_gaussian.zarr'
+    xr_dataset = xr.open_zarr(data_file)
+    xr_dataset = xr_dataset.rename(
+        dict(
+            lat = 'yu_ocean',
+            lon = 'xu_ocean',
+            Su = 'S_x',
+            Sv = 'S_y',
+            u = 'usurf',
+            v = 'vsurf'
+        )
+    ).drop('Stemp temp interior_wet_mask wet_density'.split()).isel(depth = 0)
+    return xr_dataset
 
 def load_data_from_run(run_id):
     data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing.zarr")

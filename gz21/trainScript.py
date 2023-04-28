@@ -13,7 +13,7 @@ import os.path
 import tempfile
 import xarray as xr
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,Dataset,ConcatDataset
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 import torch.nn
@@ -27,7 +27,7 @@ from data.datasets import (DatasetWithTransform, DatasetTransformer,
 # Some utils functions
 from train.utils import (DEVICE_TYPE, learning_rates_from_string,
                          run_ids_from_string, list_from_string)
-from data.utils import load_training_datasets, load_data_from_run,find_latest_data_run
+from data.utils import load_data_from_past, load_training_datasets, load_data_from_run,find_latest_data_run
 from testing.utils import create_test_dataset
 from testing.metrics import MSEMetric, MaxMetric
 from train.base import Trainer
@@ -70,7 +70,7 @@ parser.add_argument('--run_id', type=str,default = rundict['run_id'],
 parser.add_argument('--batchsize', type=int, default=8)
 parser.add_argument('--n_epochs', type=int, default=100)
 parser.add_argument('--learning_rate', type=learning_rates_from_string,
-                    default=[0,1e-3])#{'0\1e-3'})
+                    default='0 1e-3')#{'0\1e-3'})
 parser.add_argument('--train_split', type=float, default=0.8,
                     help='Between 0 and 1')
 parser.add_argument('--test_split', type=float, default=0.8,
@@ -165,70 +165,98 @@ print('Selected device type: ', device_type.value)
 
 
 # DATA-------------------------------------------------------------------------
-# Extract the run ids for the datasets to use in training
-global_ds = load_data_from_run(params.run_id)
-# Load data from the store, according to experiment id and run id
-xr_datasets :List[xr.Dataset]= load_training_datasets(global_ds, 'gz21/training_subdomains.yaml')
 
 
 
-# Split into train and test datasets
-datasets, train_datasets, test_datasets = list(), list(), list()
-
-
-for i,xr_dataset in enumerate(xr_datasets):
-    # TODO this is a temporary fix to implement seasonal patterns
-    submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
-    # print(submodel_transform)
-    xr_dataset = submodel_transform.fit_transform(xr_dataset)
-    # with ProgressBar(), TaskInfo(f'Computing dataset {i}/{len(xr_datasets)}'):
-    #     xr_dataset = xr_dataset.compute()
-    # print(xr_dataset)
-    dataset = RawDataFromXrDataset(xr_dataset)
-    dataset.index = 'time'
-    dataset.add_input('usurf')
-    dataset.add_input('vsurf')
-    dataset.add_output('S_x')
-    dataset.add_output('S_y')
-    # TODO temporary addition, should be made more general
-    if submodel == 'transform2':
-        dataset.add_output('S_x_d')
-        dataset.add_output('S_y_d')
-    train_index = int(train_split * len(dataset))
-    test_index = int(test_split * len(dataset))
-    features_transform = ComposeTransforms()
-    targets_transform = ComposeTransforms()
-    transform = DatasetTransformer(features_transform, targets_transform)
-    dataset = DatasetWithTransform(dataset, transform)
-    # dataset = MultipleTimeIndices(dataset)
-    # dataset.time_indices = [0, ]
-    train_dataset = Subset_(dataset, np.arange(train_index))
-    test_dataset = Subset_(dataset, np.arange(test_index, len(dataset)))
-    train_datasets.append(train_dataset)
-    test_datasets.append(test_dataset)
-    datasets.append(dataset)
+def get_length(varname:str):
+    global_ds =  load_data_from_past()
+    ntimes = len(global_ds.time)
+    global train_split,test_split
+    train_index = int(train_split * ntimes)
+    test_index = int(test_split * ntimes)
+    if varname == "train_dataset":
+        return train_index
+    else:
+        return ntimes - test_index + 1
+def dataset_initiator():
+    # Split into train and test datasets
+    global_ds =  load_data_from_past()#load_data_from_run(params.run_id)
+    global train_split,test_split,submodel
+    datasets, train_datasets, test_datasets = list(), list(), list()
+    xr_datasets :List[xr.Dataset]= load_training_datasets(global_ds, 'gz21/training_subdomains.yaml')
+    for domain_id,xr_dataset in enumerate(xr_datasets):
+        submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
+        xr_dataset = submodel_transform.fit_transform(xr_dataset)
+        dataset = RawDataFromXrDataset(xr_dataset)
+        dataset.index = 'time'
+        dataset.add_input('usurf')
+        dataset.add_input('vsurf')
+        dataset.add_output('S_x')
+        dataset.add_output('S_y')
+        # TODO temporary addition, should be made more general
+        if submodel == 'transform2':
+            dataset.add_output('S_x_d')
+            dataset.add_output('S_y_d')
+        train_index = int(train_split * len(dataset))
+        test_index = int(test_split * len(dataset))
+        features_transform = ComposeTransforms()
+        targets_transform = ComposeTransforms()
+        transform = DatasetTransformer(features_transform, targets_transform)
+        dataset = DatasetWithTransform(dataset, transform)
+        train_dataset = Subset_(dataset, np.arange(train_index))
+        test_dataset = Subset_(dataset, np.arange(test_index, len(dataset)))
+        train_datasets.append(train_dataset)
+        test_datasets.append(test_dataset)
+        datasets.append(dataset)
+    train_dataset = ConcatDataset_(train_datasets)
+    test_dataset = ConcatDataset_(test_datasets)
+    return train_dataset,test_dataset,train_datasets,test_datasets,datasets
+class LazyDatasetWrapper(ConcatDataset_):
+    def __init__(self, varname,):
+        self.varname = varname
+        self._lazy_init_flag = False
+        self._transform_from_model_flag = False
+        self._model = None
+        self._length = get_length(varname)
+        self._subset = None
+    def add_transforms_from_model(self,model):
+        self._model = model
+    def lazy__init__(self,):
+        train_dataset,test_dataset,datasets,_,_ = dataset_initiator()
+        if self.varname == "train_dataset":
+            subset =  train_dataset
+        else:
+            subset =  test_dataset
+        for dataset in datasets:
+            dataset.add_transforms_from_model(self._model)
+        self.__dict__.update(subset.__dict__)
+        self._subset = subset
+    def inverse_transform_target(self,*args,**kwargs):
+        if not self._lazy_init_flag:
+            self.lazy__init__()
+            self._lazy_init_flag = True
+        return self._subset.datasets[0].inverse_transform_target(*args,**kwargs)
+    def __getitem__(self,*args):
+        if not self._lazy_init_flag:
+            self.lazy__init__()
+            self._lazy_init_flag = True
+        return ConcatDataset.__getitem__(self,*args)
+    def __len__(self,):
+        return self._length
 
 # Concatenate datasets. This adds shape transforms to ensure that all regions
 # produce fields of the same shape, hence should be called after saving
 # the transformation so that when we're going to test on another region
 # this does not occur.
-train_dataset = ConcatDataset_(train_datasets)
-test_dataset = ConcatDataset_(test_datasets)
-
-# Dataloaders
-train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True,)# num_workers=4)
-test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True)
-
-print('Size of training data: {}'.format(len(train_dataset)))
-print('Size of validation data : {}'.format(len(test_dataset)))
+train_dataset = LazyDatasetWrapper('train_dataset',) #ConcatDataset_(train_datasets)
+test_dataset = LazyDatasetWrapper('test_dataset',) #ConcatDataset_(test_datasets)
+test_dataset_for_transform = LazyDatasetWrapper('test_dataset',) 
 # FIN DATA---------------------------------------------------------------------
 
 
 # NEURAL NETWORK---------------------------------------------------------------
 # Load the loss class required in the script parameters
-n_target_channels = datasets[0].n_targets
+n_target_channels = 2#datasets[0].n_targets
 criterion = getattr(train.losses, loss_cls_name)(n_target_channels)
 
 # Recover the model's class, based on the corresponding CLI parameters
@@ -241,8 +269,8 @@ except ModuleNotFoundError as e:
 except AttributeError as e:
     raise type(e)('Could not find the specified model class: ' +
                 str(e))
-
-net = model_cls(datasets[0].n_features, criterion.n_required_channels)
+    
+net = model_cls(2,4)#datasets[0].n_features, criterion.n_required_channels)
 try:
     transformation_cls = getattr(models.transforms, transformation_cls_name)
     transformation = transformation_cls()
@@ -265,9 +293,20 @@ with open(os.path.join(data_location, models_directory,
     f.write(str(net))
 # FIN NEURAL NETWORK ---------------------------------------------------------
 
-# Add transforms required by the model.
-for dataset in datasets:
-    dataset.add_transforms_from_model(net)
+
+train_dataset.add_transforms_from_model(net)
+test_dataset.add_transforms_from_model(net)
+
+
+
+print('Size of training data: {}'.format(len(train_dataset)))
+print('Size of validation data : {}'.format(len(test_dataset)))
+# Dataloaders
+train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
+                            shuffle=True, drop_last=True, num_workers=4)
+test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
+                            shuffle=False, drop_last=True, num_workers=4)
+
 
 
 # Training---------------------------------------------------------------------
@@ -276,12 +315,9 @@ for dataset in datasets:
 net.to(device)
 
 # Optimizer and learning rate scheduler
-# params = list(net.parameters())
-# optimizer = optim.Adam(params, lr=learning_rates[0], weight_decay=weight_decay)
-optimizer = optim.Adam(net.parameters(), lr=learning_rates[1], weight_decay=weight_decay)
-# lr_scheduler = MultiStepLR(optimizer, list(learning_rates.keys())[1:],
-#                         gamma=0.1)
-lr_scheduler = MultiStepLR(optimizer,[30,80], gamma=0.1)
+optimizer = optim.Adam(net.parameters(), lr=learning_rates[0], weight_decay=weight_decay)
+lr_scheduler = MultiStepLR(optimizer, list(learning_rates.keys())[1:],
+                        gamma=0.1)
 
 trainer = Trainer(net, device)
 trainer.criterion = criterion
@@ -289,8 +325,11 @@ trainer.print_loss_every = print_loss_every
 
 # metrics saved independently of the training criterion.
 metrics = {'R2': MSEMetric(), 'Inf Norm': MaxMetric()}
+features_transform = ComposeTransforms()
+targets_transform = ComposeTransforms()
+transform = DatasetTransformer(features_transform, targets_transform)
 for metric_name, metric in metrics.items():
-    metric.inv_transform = lambda x: test_dataset.inverse_transform_target(x)
+    metric.inv_transform = lambda x: transform.inverse_transform_target(x)
     trainer.register_metric(metric_name, metric)
 
 for i_epoch in range(n_epochs):
@@ -334,16 +373,11 @@ with TaskInfo('Saving trained model'):
     mlflow.log_artifact(os.path.join(data_location, models_directory))
 
 # DEBUT TEST ------------------------------------------------------------------
-
-for i_dataset, dataset, test_dataset, xr_dataset in zip(range(len(datasets)),
-                                                        datasets,
-                                                        test_datasets,
-                                                        xr_datasets):
+_,_,_,_,test_datasets = dataset_initiator()
+for i_dataset, test_dataset in enumerate(test_datasets,):
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
                                 shuffle=False, drop_last=True)
-    output_dataset = create_test_dataset(net, criterion.n_required_channels,
-                                        xr_dataset, test_dataset,
-                                        test_dataloader, test_index, device)
+    output_dataset = create_test_dataset(net, criterion.n_required_channels,test_dataset,test_dataloader, device)
 
     # Save model output on the test dataset
     output_dataset.to_zarr(os.path.join(data_location, model_output_dir,

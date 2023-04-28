@@ -170,8 +170,7 @@ def create_large_test_dataset(net, criterion, test_datasets, test_loaders,
     else:
         return xr.concat(outputs, dim='time')
 
-def create_test_dataset(net, n_out_channels,xr_dataset, test_dataset,
-                        test_dataloader, test_index, device):
+def create_test_dataset(net, n_out_channels, test_dataset,test_dataloader, device):
     velocities = np.zeros((len(test_dataset), 2, test_dataset.height,
                            test_dataset.width))
     predictions = np.zeros((len(test_dataset), n_out_channels,

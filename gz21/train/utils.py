@@ -11,7 +11,7 @@ class DEVICE_TYPE(Enum):
     GPU = 'GPU'
     CPU = 'CPU'
 
-def print_every(to_print: str, every: int, n_iter: int) -> bool:
+def print_every(to_print: str, every: int, n_iter: int,) -> bool:
     """Prints every given number of iterations.
     
     Parameters
@@ -32,7 +32,7 @@ def print_every(to_print: str, every: int, n_iter: int) -> bool:
         True if printed, False if not
     """
     if n_iter % every == every - 1:
-        print(to_print)
+        print(to_print,flush = True)
         return True
     return False
 
@@ -87,7 +87,7 @@ class RunningAverage:
 
 
 def learning_rates_from_string(rates_string: str) -> dict:
-    temp = rates_string.split('/')
+    temp = rates_string.split()
     if len(temp) == 1:
         return {0: float(rates_string)}
     if len(temp) % 2 != 0:

@@ -613,8 +613,8 @@ class DatasetWithTransform:
     def add_targets_transform_from_model(self, model):
         """Automatically reshapes the targets of the dataset to match
         the shape of the output of the model."""
-        output_height = model.output_height(self.height, self.width)
-        output_width = model.output_width(self.height, self.width)
+        output_height = self.height - 20 #model.output_height(self.height, self.width)
+        output_width = self.width - 20#model.output_width(self.height, self.width)
         transform = CropToNewShape(output_height, output_width)
         self.add_targets_transform(transform)
         return transform
@@ -714,11 +714,11 @@ class ConcatDataset_(ConcatDataset):
             dataset.add_features_transform(crop_transform)
             dataset.add_targets_transform(crop_transform)
 
-    def __getattr__(self, attr):
-        if hasattr(self.datasets[0], attr):
-            return getattr(self.datasets[0], attr)
-        else:
-            raise AttributeError()
+    # def __getattr__(self, attr):
+    #     if hasattr(self.datasets[0], attr):
+    #         return getattr(self.datasets[0], attr)
+    #     else:
+    #         raise AttributeError()
 
     # def __setattr__(self, attr_name, value):
     #     if 'coord' in attr_name:

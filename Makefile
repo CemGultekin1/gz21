@@ -46,11 +46,11 @@ setup-greene:
 interactive-singularity-writing-permitted:	
 	echo run \"source /ext3/env.sh\"
 	echo print \"exit\" to exit
-	singularity exec --overlay $(EXTFILE):rw $(CUDA_SINGULARITY) /bin/bash
+	singularity exec --nv --overlay $(EXTFILE):rw $(CUDA_SINGULARITY) /bin/bash
 
 interactive-singularity-read-only:	
 	echo run \"source /ext3/env.sh\"
 	echo print \"exit\" to exit
-	singularity exec --overlay $(EXTFILE):ro $(CUDA_SINGULARITY) /bin/bash
+	singularity exec --nv --overlay $(EXTFILE):ro $(CUDA_SINGULARITY) /bin/bash
 
 .SILENT: setup-conda-env setup-miniconda create-root-txt interactive-singularity-read-only interactive-singularity-writing-permitted setup-greene

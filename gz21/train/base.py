@@ -9,7 +9,7 @@ import torch
 from torch.nn import Module, MSELoss
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
-
+from time import time
 from .utils import print_every, RunningAverage
 
 
@@ -112,6 +112,7 @@ class Trainer:
         self._locked = True
         running_loss = RunningAverage()
         running_loss_ = RunningAverage()
+        st = time()
         for i_batch, batch in enumerate(dataloader):
             # Zero the gradients
             self.net.zero_grad()
@@ -125,6 +126,9 @@ class Trainer:
             running_loss_.update(loss.item(), X.size(0))
             # Print current loss
             loss_text = 'Loss value {}'.format(running_loss_.average)
+            tr = time()
+            avgtime = (tr-st)/(i_batch+1)
+            loss_text += f',\t avg per batch-time = {avgtime}'
             if print_every(loss_text, self.print_loss_every, i_batch):
                 # Every time we print we reset the running average
                 running_loss_.reset()
@@ -134,6 +138,10 @@ class Trainer:
                 clip_grad_norm_(self.net.parameters(), clip)
             # Update parameters
             optimizer.step()
+            
+            # dummy gpu activity to avoid losing the gpu - bad for the climate, good for the business 
+            dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
+            self.net(dummy)
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()

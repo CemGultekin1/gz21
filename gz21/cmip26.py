@@ -132,6 +132,8 @@ def main():
     forcing.to_zarr(join(tmpdirname, 'forcing.zarr'), mode='w')
     # Log as an artifact the forcing data
     logger.info('Logging processed dataset as an artifact...')
+    # TODO this part increases the memory requirement and causing a out-of-memory exit
+    # Currently handled by moving the folder manually into mlruns
     mlflow.log_artifact(join(tmpdirname, 'forcing.zarr'))
     logger.info('Completed...')
     
