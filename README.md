@@ -55,6 +55,12 @@ To run a training job use
 mlflow run -e train . --env-manager local --experiment-name train --run-name full
 ```
 
+or you can use slurm. The following line can be run only from outside of the singularity.
+
+```
+sbatch slurm/jobs/train.s
+```
+
 All of these processes use `tempfile` library. `tempfile` opens randomly named folders inside the folder `temp`
 to store things such as neural network weights or coarse-grained data during the execution.
 However, currently the code does not clean `temp` after the execution is done. This is because
