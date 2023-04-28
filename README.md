@@ -21,19 +21,23 @@ source /ext3/env.sh
 ```
 
 The `mlflow` steps are defined in `MLproject`. For a test, the following will coarse-grain a couple time instances of high resolution data and save the created coarse-grid variables as an mlflow artifact
-into `mlruns/<experiment_id>/<run_id>/artifacts/forcing/`. 
+into `mlruns/<experiment_id>/<run_id>/artifacts/forcing.zarr`. 
 
 ```
-mlflow run -e data-test . --env-manager local --experiment-name data_generation --run-name test
+mlflow run -e data-test . --env-manager local --experiment-name data --run-name test
+```
+Above `--env-manager local` ensures the locally existing environment is used. `experiment_name` and `run_name` are arbitrary. 
+But it might be useful to keep a convention to search for past runs. For a full run of data generation use
+```
+mlflow run -e data . --env-manager local --experiment-name data --run-name full
 ```
 
-Above `--env-manager local` ensures the locally existing environment is used. 
 To access the generated data, the above entered params `experiment_name` and `run_name` can be used as provided in `peek.py`. 
 Inside `MLproject`, `peek` is another entry point which plots `time=0` fields of the data. The plots are 
 saved as artifacts similar to the data. 
 
 ```
-mlflow run -e peek . --env-manager local --experiment-name data_generation --run-name peek
+mlflow run -e peek . --env-manager local --experiment-name data --run-name peek
 ```
 
 Creation of the slurm tasks are done with
@@ -48,5 +52,12 @@ To change the specifics of the `*.sbatch` files, edit `gz21/slurm/jobs.py`.
 To run a training job use 
 
 ```
-mlflow run -e train . --env-manager local --experiment-name train --run-name full;
+mlflow run -e train . --env-manager local --experiment-name train --run-name full
 ```
+
+All of these processes use `tempfile` library. `tempfile` opens randomly named folders inside the folder `temp`
+to store things such as neural network weights or coarse-grained data during the execution.
+However, currently the code does not clean `temp` after the execution is done. This is because
+the processes take long to execute and may raise an error. When the proper `tempfile` system is used
+the partial progress gets deleted automatically. This way it is possible see the partial process.
+But don't forget to clean `temp` folder once in a while.
