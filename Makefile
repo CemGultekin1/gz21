@@ -36,6 +36,7 @@ setup-conda-env: environment_droplet.yml
 	singularity exec --overlay $(EXTFILE) $(CUDA_SINGULARITY) /bin/bash -c "\
 		source /ext3/env.sh;
 		pip install -r requirements.txt;
+		pip install zarr xarray fsspec aiohttp requests;
 	"
 setup-greene: 
 	make setup-miniconda
