@@ -37,15 +37,15 @@ class Transform(Module, ABC):
 class PrecisionTransform(Transform):
     def __init__(self, min_value=0.1):
         super().__init__()
-        self.min_value = Parameter(torch.tensor(min_value))
+        self._min_value = Parameter(torch.tensor(min_value))
 
     @property
     def min_value(self):
         return softplus(self._min_value)
 
-    @min_value.setter
-    def min_value(self, value):
-        self._min_value = Parameter(torch.tensor(value))
+    # @min_value.setter
+    # def min_value(self, value):
+    #     self._min_value = Parameter(torch.tensor(value))
 
     @property
     def indices(self):
