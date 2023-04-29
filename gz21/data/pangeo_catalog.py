@@ -11,7 +11,7 @@ import xarray as xr
 # import numpy as np
 
 # from intake.config import conf
-from paths import CM2P6_SURFACE_1PCT_CO2_UVT,CM2P6_SURFACE_UVT,GRID_DATA 
+from gz21.paths import CM2P6_SURFACE_1PCT_CO2_UVT,CM2P6_SURFACE_UVT,GRID_DATA 
 # conf['persist_path'] = ROOT#'/scratch/ag7531/'
 # CACHE_FOLDER = '/scratch/ag7531/cm26_cache'
 

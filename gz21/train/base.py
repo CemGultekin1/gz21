@@ -11,7 +11,7 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from time import time
 from .utils import print_every, RunningAverage
-
+from gz21.data.landmasks import CoarseGridLandMask
 
 class Trainer:
     """Training object for a neural network on a specific device.
@@ -38,7 +38,7 @@ class Trainer:
         they are only reported on the test dataset.
     """
 
-    def __init__(self, net: Module, device: torch.device):
+    def __init__(self, net: Module, device: torch.device,land_mask_type:str = "None"):
         self._net = net
         self._device = device
         self._criterion = MSELoss()
@@ -48,7 +48,7 @@ class Trainer:
         self._early_stopping = 4
         self._best_test_loss = None
         self._counter = 0
-
+        
     @property
     def net(self):
         return self._net
@@ -119,9 +119,17 @@ class Trainer:
             # Move batch to the GPU (if possible)
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
+            M = batch[2][:,:1,...].to(self._device, dtype=torch.float)
+            
             Y_hat = self.net(X)
+            
+            # print(f'torch.any(torch.isnan(X)) = {torch.any(torch.isnan(X))}')
+            # print(f'torch.any(torch.isnan(Y)) = {torch.any(torch.isnan(Y))}')
+            # print(f'torch.any(torch.isnan(Y_hat)) = {torch.any(torch.isnan(Y_hat))}')
+            # print(f'torch.any(torch.isnan(M)) = {torch.any(torch.isnan(M))}')
+            
             # Compute loss
-            loss = self.criterion(Y_hat, Y)
+            loss = self.criterion(Y_hat*M, Y*M)
             running_loss.update(loss.item(), X.size(0))
             running_loss_.update(loss.item(), X.size(0))
             # Print current loss
@@ -139,9 +147,11 @@ class Trainer:
             # Update parameters
             optimizer.step()
             
-            # dummy gpu activity to avoid losing the gpu - bad for the climate, good for the business 
-            dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
-            self.net(dummy)
+            # dummy gpu activity to avoid losing the gpu 
+            # bad for the climate, good for the business 
+            # dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
+            # self.net(dummy)
+            
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()
@@ -176,15 +186,16 @@ class Trainer:
                 # Move batch to GPU
                 X = batch[0].to(self._device, dtype=torch.float)
                 Y = batch[1].to(self._device, dtype=torch.float)
+                M = batch[2].to(self._device, dtype=torch.float)
                 Y_hat = self.net(X)
                 # Compute loss
-                loss = self.criterion(Y_hat, Y)
+                loss = self.criterion(Y_hat*M, Y*M)
                 running_loss.update(loss.item(), X.size(0))
                 # Compute metrics based on a single predicted value.
                 # For heteroskedastic loss the prediction is the mean
                 Y_hat = self.criterion.predict(Y_hat)
                 for metric in self.metrics.values():
-                    metric.update(Y_hat, Y)
+                    metric.update(Y_hat*M, Y*M)
         test_loss = running_loss.value
         # Test early stopping
         if self._best_test_loss is None or test_loss < self._best_test_loss:

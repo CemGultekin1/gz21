@@ -99,8 +99,14 @@ parser.add_argument('--targets_transform_cls_name', type=str, default='None',
                     help='Depreciated')
 parser.add_argument('--seed', type=int, default=0,
                     help='torch.manual_seed')
+parser.add_argument('--land_mask', type=str, default='None',
+                    help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
+parser.add_argument('--domain', type=str, default="four_regions",
+                    help="use 'global' for training on the whole globe")
 params = parser.parse_args()
 
+if params.domain == "four_regions" and params.land_mask != "None":
+    raise NotImplementedError
 # Log the experiment_id and run_id of the source dataset
 mlflow.log_param('source.experiment_id', params.exp_id)
 mlflow.log_param('source.run_id', params.run_id)
@@ -178,12 +184,16 @@ def get_length(varname:str):
         return train_index
     else:
         return ntimes - test_index + 1
-def dataset_initiator():
+def dataset_initiator(domain :str = "four_regions"):
     # Split into train and test datasets
     global_ds =  load_data_from_past()#load_data_from_run(params.run_id)
     global train_split,test_split,submodel
     datasets, train_datasets, test_datasets = list(), list(), list()
-    xr_datasets :List[xr.Dataset]= load_training_datasets(global_ds, 'gz21/training_subdomains.yaml')
+    if domain == "four_regions":
+        xr_datasets :List[xr.Dataset]= load_training_datasets(global_ds, 'gz21/training_subdomains.yaml')
+    else:
+        assert domain == "global"
+        xr_datasets = [global_ds]
     for domain_id,xr_dataset in enumerate(xr_datasets):
         submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
         xr_dataset = submodel_transform.fit_transform(xr_dataset)
@@ -211,18 +221,21 @@ def dataset_initiator():
     train_dataset = ConcatDataset_(train_datasets)
     test_dataset = ConcatDataset_(test_datasets)
     return train_dataset,test_dataset,train_datasets,test_datasets,datasets
+
 class LazyDatasetWrapper(ConcatDataset_):
-    def __init__(self, varname,):
+    def __init__(self, varname,land_mask:str = "None",**_init_kwargs):
         self.varname = varname
         self._lazy_init_flag = False
         self._transform_from_model_flag = False
         self._model = None
         self._length = get_length(varname)
+        self._init_kwargs = _init_kwargs
         self._subset = None
+        self._land_mask = land_mask
     def add_transforms_from_model(self,model):
         self._model = model
     def lazy__init__(self,):
-        train_dataset,test_dataset,datasets,_,_ = dataset_initiator()
+        train_dataset,test_dataset,datasets,_,_ = dataset_initiator(**self._init_kwargs)
         if self.varname == "train_dataset":
             subset =  train_dataset
         else:
@@ -231,6 +244,23 @@ class LazyDatasetWrapper(ConcatDataset_):
             dataset.add_transforms_from_model(self._model)
         self.__dict__.update(subset.__dict__)
         self._subset = subset
+        if self._land_mask  != "None":
+            from gz21.data.landmasks import CoarseGridLandMask
+            self.cglm = CoarseGridLandMask()
+        else:
+            self.cglm = None
+    @property
+    def land_mask(self,):
+        if not self._lazy_init_flag:
+            self.lazy__init__()
+            self._lazy_init_flag = True
+        if self.cglm is None:
+            return None
+        else:
+            if self._land_mask == "interior":
+                return self.cglm.interior_land_mask
+            elif self._land_mask == "default":
+                return self.cglm.land_mask
     def inverse_transform_target(self,*args,**kwargs):
         if not self._lazy_init_flag:
             self.lazy__init__()
@@ -240,7 +270,17 @@ class LazyDatasetWrapper(ConcatDataset_):
         if not self._lazy_init_flag:
             self.lazy__init__()
             self._lazy_init_flag = True
-        return ConcatDataset.__getitem__(self,*args)
+        x,y = ConcatDataset.__getitem__(self,*args)
+        x = np.where(np.isnan(x),0,x)
+        y = np.where(np.isnan(y),0,y)
+        if self.cglm is None:            
+            return x,y,y*0 + 1
+        else:
+            land_mask = self.land_mask
+            spread = (land_mask.shape[1] - y.shape[1])//2
+            spslc = slice(spread,-spread)
+            land_mask = land_mask[:,spslc,spslc]
+            return x,y,land_mask
     def __len__(self,):
         return self._length
 
@@ -248,9 +288,9 @@ class LazyDatasetWrapper(ConcatDataset_):
 # produce fields of the same shape, hence should be called after saving
 # the transformation so that when we're going to test on another region
 # this does not occur.
-train_dataset = LazyDatasetWrapper('train_dataset',) #ConcatDataset_(train_datasets)
-test_dataset = LazyDatasetWrapper('test_dataset',) #ConcatDataset_(test_datasets)
-test_dataset_for_transform = LazyDatasetWrapper('test_dataset',) 
+train_dataset = LazyDatasetWrapper('train_dataset',land_mask = params.land_mask,domain = params.domain) #ConcatDataset_(train_datasets)
+test_dataset = LazyDatasetWrapper('test_dataset',land_mask = params.land_mask,domain = params.domain) #ConcatDataset_(test_datasets)
+test_dataset_for_transform = LazyDatasetWrapper('test_dataset',land_mask = params.land_mask,domain = params.domain) 
 # FIN DATA---------------------------------------------------------------------
 
 
@@ -319,7 +359,8 @@ optimizer = optim.Adam(net.parameters(), lr=learning_rates[0], weight_decay=weig
 lr_scheduler = MultiStepLR(optimizer, list(learning_rates.keys())[1:],
                         gamma=0.1)
 
-trainer = Trainer(net, device)
+
+trainer = Trainer(net, device,)#land_mask_type = params.land_mask)
 trainer.criterion = criterion
 trainer.print_loss_every = print_loss_every
 

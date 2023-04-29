@@ -69,8 +69,8 @@ def main():
     # If global data, we make the dataset cyclic along longitude
     if params.global_ == 1:
         logger.info('Cyclic data... Making the dataset cyclic along longitude...')
-        patch_data = cyclize_dataset(patch_data, 'xu_ocean', params.factor)
-        grid_data = cyclize_dataset(grid_data, 'xu_ocean', params.factor)
+        # patch_data = cyclize_dataset(patch_data, 'xu_ocean', params.factor)
+        # grid_data = cyclize_dataset(grid_data, 'xu_ocean', params.factor)
         # Rechunk along the cyclized dimension
         print(f'patch_data  = patch_data.chunk(chunks = dict(time = ({int(params.num_cpus)}),xu_ocean = (-1)))')
         patch_data  = patch_data.chunk(chunks = dict(time = (int(params.num_cpus)),xu_ocean = (-1)))

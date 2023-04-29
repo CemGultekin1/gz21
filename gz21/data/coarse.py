@@ -32,8 +32,8 @@ def advections(u_v_field: xr.Dataset, grid_data: xr.Dataset):
     """
     dxu = grid_data['dxu']
     dyu = grid_data['dyu']
-    gradient_x = u_v_field.diff(dim='xu_ocean') / dxu
-    gradient_y = u_v_field.diff(dim='yu_ocean') / dyu
+    gradient_x = (u_v_field - u_v_field.roll({"xu_ocean":1}))/dxu#u_v_field.diff(dim='xu_ocean') / dxu
+    gradient_y =  (u_v_field - u_v_field.roll({"yu_ocean":1}))/dyu#u_v_field.diff(dim='yu_ocean') / dyu
     # Interpolate back the gradients
     interp_coords = dict(xu_ocean=u_v_field.coords['xu_ocean'],
                          yu_ocean=u_v_field.coords['yu_ocean'])
@@ -70,7 +70,7 @@ def spatial_filter(data: np.ndarray, sigma: float):
     result = np.zeros_like(data)
     for t in range(data.shape[0]):
         data_t = data[t, ...]
-        result_t = gaussian_filter(data_t, sigma, mode='constant')
+        result_t = gaussian_filter(data_t, sigma, mode='wrap')
         result[t, ...] = result_t
     return result
 

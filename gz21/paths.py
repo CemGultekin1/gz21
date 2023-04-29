@@ -13,9 +13,11 @@ files = read_made_dictionary()
 SLURM_JOBS = os.path.abspath('slurm/jobs')
 SLURM_ECHO = os.path.abspath('slurm/echo')
 TEMP = os.path.abspath('temp')
-for directory in [TEMP,SLURM_ECHO,SLURM_JOBS]:
+LANDMASKS = os.path.abspath('landmasks')
+for directory in [TEMP,SLURM_ECHO,SLURM_JOBS,LANDMASKS]:
     if not os.path.exists(directory):
         os.makedirs(directory)
+        
     
 
 EXT3 = os.path.abspath(files['EXTFILE'])
@@ -27,3 +29,4 @@ GRID_DATA = os.path.join(LAB_CM2P6_PATH,'GFDL_CM2_6_grid.nc')
 CM2P6_SURFACE_1PCT_CO2_UVT = os.path.join(LAB_CM2P6_PATH,'surface_1pct_co2.zarr')
 
 
+COARSE_DATA_PATH = '/scratch/cg3306/climate/outputs/data/coarse_4_surface_gaussian.zarr'

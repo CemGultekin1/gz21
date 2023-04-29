@@ -9,6 +9,7 @@ import mlflow
 import xarray as xr
 from yaml import Loader, Dumper,load
 from mlflow import MlflowClient
+from gz21.paths import COARSE_DATA_PATH
 def find_latest_data_run()->dict:
     experiment_name = "data"
     runs = mlflow.search_runs(
@@ -18,7 +19,7 @@ def find_latest_data_run()->dict:
     return runs.loc[len(runs)-1].to_dict()
 
 def load_data_from_past():
-    data_file = '/scratch/cg3306/climate/outputs/data/coarse_4_surface_gaussian.zarr'
+    data_file = COARSE_DATA_PATH
     xr_dataset = xr.open_zarr(data_file)
     xr_dataset = xr_dataset.rename(
         dict(

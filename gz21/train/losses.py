@@ -143,10 +143,14 @@ class HeteroskedasticGaussianLossV2(_Loss):
     def pointwise_likelihood(self, input: torch.Tensor, target: torch.Tensor):
         # Split the target into mean (first half of channels) and scale
         mean, precision = torch.split(input, self.n_target_channels, dim=1)
-        if not torch.all(precision > 0):
+        if not torch.all(precision >= 0):
             raise ValueError('Got a non-positive variance value. \
                              Pre-processed variance tensor was: \
                                  {}'.format(torch.min(precision)))
+        zmap = precision > 0
+        precision = precision[zmap]
+        target = target[zmap]
+        mean= mean[zmap]
         if self.mode is VarianceMode.precision:
             term1 = - torch.log(precision)
             term2 = 1 / 2 * (target - (mean + self.bias))**2 * precision**2
@@ -158,7 +162,7 @@ class HeteroskedasticGaussianLossV2(_Loss):
     def forward(self, input: torch.Tensor, target: torch.Tensor):
         lkhs = self.pointwise_likelihood(input, target)
         # Ignore nan values in targets.
-        lkhs = lkhs[~torch.isnan(target)]
+        # lkhs = lkhs[~torch.isnan(target)] # No NAN Values ~ hopefully 
         return lkhs.mean()
 
     def predict(self, input: torch.Tensor):
