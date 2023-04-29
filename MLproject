@@ -47,6 +47,7 @@ entry_points:
       model_cls_name : {type : string, default : FullyCNN}
       loss_cls_name : {type : string, default : HeteroskedasticGaussianLossV2}
       transformation_cls_name : {type : string, default : SoftPlusTransform}
+      submodel : {type: string, default : transform3}
       features_transform_cls_name : {type : string, default : FixedVelocityNormalizer}
       targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
       #{exp_id} {run_id} 
