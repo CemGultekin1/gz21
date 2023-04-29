@@ -18,7 +18,7 @@ def find_latest_data_run()->dict:
     return runs.loc[len(runs)-1].to_dict()
 
 def load_data_from_past():
-    data_file = '/scratch/zanna/data/cm2.6/coarse_datasets/coarse_4_surface_gaussian.zarr'
+    data_file = '/scratch/cg3306/climate/outputs/data/coarse_4_surface_gaussian.zarr'
     xr_dataset = xr.open_zarr(data_file)
     xr_dataset = xr_dataset.rename(
         dict(
