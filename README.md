@@ -52,13 +52,13 @@ To change the specifics of the `*.sbatch` files, edit `gz21/slurm/jobs.py`.
 To run a training job use 
 
 ```
-mlflow run -e train . --env-manager local --experiment-name train --run-name full
+mlflow run -e four-regions-train . --env-manager local --experiment-name train --run-name full
 ```
 
 or you can use slurm. The following line can be run only from outside of the singularity.
 
 ```
-sbatch slurm/jobs/train.s
+sbatch slurm/jobs/r4train.s
 ```
 
 All of these processes use `tempfile` library. `tempfile` opens randomly named folders inside the folder `temp`

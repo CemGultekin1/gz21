@@ -57,10 +57,10 @@ def write_mlflow_slurm_job(
         f.write(sb)
         
 def main():
-    write_mlflow_slurm_job("data-test","data","test","data_test",time = "10:00",mem = 16,cpus_per_task = 2)
     write_mlflow_slurm_job("data","data","full","datagen",time = "24:00:00",mem = 200,cpus_per_task = 4)
-    write_mlflow_slurm_job("train","train","test","train_test",time = "8:00:00",mem = 60,cpus_per_task = 1)
-    write_mlflow_slurm_job("train","train","full","train",time = "8:00:00",mem = 60,cpus_per_task = 8,gres = "gpu:1")
+    write_mlflow_slurm_job("four-regions-train","r4train","full","r4train",time = "8:00:00",mem = 60,cpus_per_task = 8,gres = "gpu:1")
+    write_mlflow_slurm_job("global-interior-train","gitrain","full","gitrain",time = "32:00:00",mem = 60,cpus_per_task = 8,gres = "gpu:1")
+    write_mlflow_slurm_job("global-train","gtrain","full","gtrain",time = "32:00:00",mem = 60,cpus_per_task = 8,gres = "gpu:1")
     
         
 if __name__ == '__main__':
