@@ -367,9 +367,10 @@ net.cuda(device)
 # Save other parts of the model
 # TODO this should not be necessary
 print('Saving other parts of the model')
-full_path = os.path.join(data_location, models_directory, 'transformation')
-with open(full_path, 'wb') as f:
-    pickle.dump(transformation, f)
+full_path = os.path.join(data_location, models_directory, 'final_transformation.pth')
+torch.save(net.final_transformation, full_path)
+# with open(full_path, 'wb') as f:
+#     pickle.dump(transformation, f)
 
 with TaskInfo('Saving trained model'):
     mlflow.log_artifact(os.path.join(data_location, models_directory))
