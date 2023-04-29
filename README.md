@@ -68,11 +68,12 @@ the processes take long to execute and may raise an error. When the proper `temp
 the partial progress gets deleted automatically. This way it is possible see the partial process.
 But don't forget to clean `temp` folder once in a while.
 
-Updating the environment packages can be done through `environment_droplet.yml`. 
+Updating the environment packages can be done through `requirements.txt`. 
 If need to install new packages, enter the singularity with a writing permit and 
 install the packages. Once it is done, if you want to keep the changes as a dependency 
-on github update `environment_droplet.yml` using the following line.
+on github update `requirements.txt` using the following line. Note that
+`pipreqs` will only consider those libraries that are imported in the code.
 
 ```
-conda env export > environment_droplet.yml
+python3 -m  pipreqs.pipreqs . --force
 ```
