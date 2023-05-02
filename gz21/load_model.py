@@ -34,8 +34,10 @@ def load_paper_net(device: str = 'gpu'):
     print('After load_model_cls()')
     net = model_cls(2, 4)
     print('After net')
+    tempfile = 'tmpuibo6iec'
+    root = f'/scratch/cg3306/climate/subgrid/gz21/temp/{tempfile}/models'
     if device == 'cpu':
-        transformation = torch.load('temp/exmple/final_transformation.pth')
+        transformation = torch.load(f'{root}/final_transformation.pth', map_location=torch.device('cpu'))
         print('After torch.load()')
     net.final_transformation = transformation
     print('After transformation')
@@ -47,11 +49,11 @@ def load_paper_net(device: str = 'gpu'):
     print('After mlflow.tracking.MlflowClient()')
 #    model_file = client.download_artifacts(MODEL_RUN_ID,
 #                                           'nn_weights_cpu.pth')
-    model_file = '/scratch/cimes/cz3321/MOM6/MOM6-examples/src/MOM6/config_src/external/ML_Forpy/Forpy_CNN_GZ21/.pth'
+
     print('After download_artifacts()')
     if device == 'cpu':
         print('Device: CPU')
-        model_file = 'temp/exmple/trained_model.pth'
+        model_file = f'{root}/trained_model.pth'
         net.load_state_dict(torch.load(model_file, map_location=torch.device('cpu')))
     print(net)
     return net

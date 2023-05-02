@@ -103,6 +103,8 @@ parser.add_argument('--land_mask', type=str, default='None',
                     help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
 parser.add_argument('--domain', type=str, default="four_regions",
                     help="use 'global' for training on the whole globe")
+parser.add_argument('--num_workers', type=int, default=8,
+                    help="use 'global' for training on the whole globe")
 params = parser.parse_args()
 
 if params.domain == "four_regions" and params.land_mask != "None":
@@ -187,6 +189,7 @@ def get_length(varname:str):
 def dataset_initiator(domain :str = "four_regions"):
     # Split into train and test datasets
     global_ds =  load_data_from_past()#load_data_from_run(params.run_id)
+    global_ds = global_ds.sel(yu_ocean = slice(-60,60))
     global train_split,test_split,submodel
     datasets, train_datasets, test_datasets = list(), list(), list()
     if domain == "four_regions":
@@ -223,12 +226,12 @@ def dataset_initiator(domain :str = "four_regions"):
     return train_dataset,test_dataset,train_datasets,test_datasets,datasets
 
 class LazyDatasetWrapper(ConcatDataset_):
-    def __init__(self, varname,land_mask:str = "None",**_init_kwargs):
+    def __init__(self, varname,land_mask:str = "None",num_domains:int = 1,**_init_kwargs):
         self.varname = varname
         self._lazy_init_flag = False
         self._transform_from_model_flag = False
         self._model = None
-        self._length = get_length(varname)
+        self._length = get_length(varname)*num_domains
         self._init_kwargs = _init_kwargs
         self._subset = None
         self._land_mask = land_mask
@@ -246,7 +249,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._subset = subset
         if self._land_mask  != "None":
             from gz21.data.landmasks import CoarseGridLandMask
-            self.cglm = CoarseGridLandMask()
+            self.cglm = CoarseGridLandMask()#cnn_field_of_view=25,)
         else:
             self.cglm = None
     @property
@@ -270,7 +273,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         if not self._lazy_init_flag:
             self.lazy__init__()
             self._lazy_init_flag = True
-        x,y = ConcatDataset.__getitem__(self,*args)
+        x,y = super().__getitem__(*args)
         x = np.where(np.isnan(x),0,x)
         y = np.where(np.isnan(y),0,y)
         if self.cglm is None:            
@@ -278,8 +281,9 @@ class LazyDatasetWrapper(ConcatDataset_):
         else:
             land_mask = self.land_mask
             spread = (land_mask.shape[1] - y.shape[1])//2
-            spslc = slice(spread,-spread)
-            land_mask = land_mask[:,spslc,spslc]
+            if spread > 0:
+                spslc = slice(spread,-spread)
+                land_mask = land_mask[:,spslc,spslc]
             return x,y,land_mask
     def __len__(self,):
         return self._length
@@ -343,9 +347,9 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True, num_workers=8)
+                            shuffle=True, drop_last=True, params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True, num_workers=8)
+                            shuffle=False, drop_last=True, params.num_workers)
 
 
 
@@ -394,6 +398,9 @@ for i_epoch in range(n_epochs):
     mlflow.log_metric('train loss', train_loss, i_epoch)
     mlflow.log_metric('test loss', test_loss, i_epoch)
     mlflow.log_metrics(metrics_results)
+    
+    full_path = os.path.join(data_location, models_directory, model_name)
+    torch.save(net.state_dict(), full_path)
 # Update the logged number of actual training epochs
 mlflow.log_param('n_epochs_actual', i_epoch + 1)
 

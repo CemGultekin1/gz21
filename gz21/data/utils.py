@@ -31,7 +31,7 @@ def load_data_from_past():
             v = 'vsurf'
         )
     ).drop('Stemp temp interior_wet_mask wet_density'.split()).isel(depth = 0)
-    return xr_dataset
+    return xr_dataset#.isel(time= [0,1,2])
 
 def load_data_from_run(run_id):
     data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing.zarr")

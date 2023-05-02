@@ -119,10 +119,17 @@ class Trainer:
             # Move batch to the GPU (if possible)
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
-            M = batch[2][:,:1,...].to(self._device, dtype=torch.float)
+            M = batch[2].to(self._device, dtype=torch.float)
             
+            # RX = torch.randn(X.shape)
+            # RX[X!=0] = 0
+            # Y_hat = self.net(RX)
             Y_hat = self.net(X)
             
+            # torchdict = dict(input =RX,true_result = Y,output = Y_hat,mask = M,**self.net.state_dict())
+            # torch.save(torchdict,f'train_interrupt_{i_batch}.pth')
+            # if i_batch == 1:
+            #     raise Exception
             # print(f'torch.any(torch.isnan(X)) = {torch.any(torch.isnan(X))}')
             # print(f'torch.any(torch.isnan(Y)) = {torch.any(torch.isnan(Y))}')
             # print(f'torch.any(torch.isnan(Y_hat)) = {torch.any(torch.isnan(Y_hat))}')
@@ -151,7 +158,7 @@ class Trainer:
             # bad for the climate, good for the business 
             # dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
             # self.net(dummy)
-            
+        raise Exception
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()
@@ -187,7 +194,7 @@ class Trainer:
                 X = batch[0].to(self._device, dtype=torch.float)
                 Y = batch[1].to(self._device, dtype=torch.float)
                 M = batch[2].to(self._device, dtype=torch.float)
-                Y_hat = self.net(X)
+                Y_hat = self.net(X)                
                 # Compute loss
                 loss = self.criterion(Y_hat*M, Y*M)
                 running_loss.update(loss.item(), X.size(0))
