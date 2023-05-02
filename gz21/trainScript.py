@@ -226,11 +226,13 @@ def dataset_initiator(domain :str = "four_regions"):
     return train_dataset,test_dataset,train_datasets,test_datasets,datasets
 
 class LazyDatasetWrapper(ConcatDataset_):
-    def __init__(self, varname,land_mask:str = "None",num_domains:int = 1,**_init_kwargs):
+    def __init__(self, varname,land_mask:str = "None",**_init_kwargs):
         self.varname = varname
         self._lazy_init_flag = False
         self._transform_from_model_flag = False
         self._model = None
+        global params
+        num_domains = 1 if params.domain == "global" else 4
         self._length = get_length(varname)*num_domains
         self._init_kwargs = _init_kwargs
         self._subset = None
@@ -276,8 +278,8 @@ class LazyDatasetWrapper(ConcatDataset_):
         x,y = super().__getitem__(*args)
         x = np.where(np.isnan(x),0,x)
         y = np.where(np.isnan(y),0,y)
-        if self.cglm is None:            
-            return x,y,y*0 + 1
+        if self.land_mask is None:            
+            return x,y,y[:1]*0 + 1
         else:
             land_mask = self.land_mask
             spread = (land_mask.shape[1] - y.shape[1])//2
@@ -347,9 +349,9 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True, params.num_workers)
+                            shuffle=True, drop_last=True, num_workers = params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True, params.num_workers)
+                            shuffle=False, drop_last=True, num_workers = params.num_workers)
 
 
 

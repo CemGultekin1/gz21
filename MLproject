@@ -38,10 +38,10 @@ entry_points:
       batchsize : {type : float, default : 4}
       learning_rate : {type : string, default : 0 5e-4 10 5e-5 20 5e-6}
       n_epochs : {type : float, default : 100}
-      train_split : {type : float, default : 1}
-      test_split : {type : float, default : 1}
+      train_split : {type : float, default : 0.6}
+      test_split : {type : float, default : 0.7}
       time_indices : {type : string, default : 0}
-      print_every : {type : float, default : 1}
+      print_every : {type : float, default : 20}
       weight_decay : {type : float, default : 0}
       model_module_name : {type : string, default : models.models1}
       model_cls_name : {type : string, default : FullyCNN}

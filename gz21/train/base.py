@@ -120,7 +120,7 @@ class Trainer:
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
             M = batch[2].to(self._device, dtype=torch.float)
-            
+            # print(X.shape,Y.shape,M.shape)
             # RX = torch.randn(X.shape)
             # RX[X!=0] = 0
             # Y_hat = self.net(RX)
