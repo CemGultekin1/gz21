@@ -720,6 +720,7 @@ class ConcatDataset_(Dataset):
     def __getitem__(self,i:int):
         domi = i%len(self.datasets)
         ti = i//len(self.datasets)
+        ti = ti % len(self.datasets[domi])
         return self.datasets[domi][ti]
 
     # def __getattr__(self, attr):

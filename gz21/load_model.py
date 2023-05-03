@@ -31,15 +31,14 @@ def load_paper_net(device: str = 'gpu'):
     model_module_name = 'gz21.models.models1'
     model_cls_name = 'FullyCNN'
     model_cls = load_model_cls(model_module_name, model_cls_name)
-    print('After load_model_cls()')
     net = model_cls(2, 4)
-    print('After net')
-    tempfile = 'tmpuibo6iec'
+    
+    tempfile = 'tmptsp2jxp1'#'tmputijzpt_'#
     root = f'/scratch/cg3306/climate/subgrid/gz21/temp/{tempfile}/models'
     if device == 'cpu':
         transformation = torch.load(f'{root}/final_transformation.pth', map_location=torch.device('cpu'))
         print('After torch.load()')
-    net.final_transformation = transformation
+        net.final_transformation = transformation
     print('After transformation')
 
     # Load parameters of pre-trained model
@@ -54,13 +53,14 @@ def load_paper_net(device: str = 'gpu'):
     if device == 'cpu':
         print('Device: CPU')
         model_file = f'{root}/trained_model.pth'
-        net.load_state_dict(torch.load(model_file, map_location=torch.device('cpu')))
+        state_dict = torch.load(model_file, map_location=torch.device('cpu'))
+        net.load_state_dict(state_dict)
     print(net)
     return net
 nn = load_paper_net('cpu')
 nn.eval()
 
-x = torch.ones((1,2,30,30),dtype = torch.float32)
+x = torch.zeros((1,2,30,30),dtype = torch.float32)
 y = nn(x)[0]
 print(torch.mean(torch.mean(y,dim = 1),dim = 1))
 

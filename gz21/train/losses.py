@@ -147,10 +147,10 @@ class HeteroskedasticGaussianLossV2(_Loss):
             raise ValueError('Got a non-positive variance value. \
                              Pre-processed variance tensor was: \
                                  {}'.format(torch.min(precision)))
-        zmap = precision > 0
-        precision = precision[zmap]
-        target = target[zmap]
-        mean= mean[zmap]
+        # zmap = precision > 0
+        # precision = precision[zmap]
+        # target = target[zmap]
+        # mean= mean[zmap]
         if self.mode is VarianceMode.precision:
             term1 = - torch.log(precision)
             term2 = 1 / 2 * (target - (mean + self.bias))**2 * precision**2

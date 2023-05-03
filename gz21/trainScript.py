@@ -349,7 +349,7 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True, num_workers = params.num_workers)
+                            shuffle=False, drop_last=True, num_workers = params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
                             shuffle=False, drop_last=True, num_workers = params.num_workers)
 
@@ -361,7 +361,9 @@ test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
 net.to(device)
 
 # Optimizer and learning rate scheduler
-optimizer = optim.Adam(net.parameters(), lr=learning_rates[0], weight_decay=weight_decay)
+#optimizer = torch.optim.SGD(net.parameters(),lr = 0.1)#
+optimizer = optim.SGD(net.parameters(), learning_rates[0], weight_decay=weight_decay)
+print(optimizer)
 lr_scheduler = MultiStepLR(optimizer, list(learning_rates.keys())[1:],
                         gamma=0.1)
 
@@ -403,6 +405,9 @@ for i_epoch in range(n_epochs):
     
     full_path = os.path.join(data_location, models_directory, model_name)
     torch.save(net.state_dict(), full_path)
+    full_path = os.path.join(data_location, models_directory, 'final_transformation.pth')
+    torch.save(net.final_transformation, full_path)
+    
 # Update the logged number of actual training epochs
 mlflow.log_param('n_epochs_actual', i_epoch + 1)
 
