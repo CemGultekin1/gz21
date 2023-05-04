@@ -133,7 +133,7 @@ class Trainer:
             # print(f'torch.any(torch.isnan(M)) = {torch.any(torch.isnan(M))}')
             
             # Compute loss
-            loss =  self.criterion(Y_hat, Y)
+            loss =  self.criterion(Y_hat*M, Y*M)
             
             # torchdict = dict(input =X, true_result = Y, output = Y_hat, mask = M,loss = loss.detach().item(), **self.net.state_dict())
             # torch.save(torchdict,f'train_interrupt_{i_batch}_.pth')
@@ -159,8 +159,8 @@ class Trainer:
             
             # dummy gpu activity to avoid losing the gpu 
             # bad for the climate, good for the business 
-            dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
-            self.net(dummy)
+            # dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
+            # self.net(dummy)
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()

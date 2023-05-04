@@ -349,7 +349,7 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True, num_workers = params.num_workers)
+                            shuffle=True, drop_last=True, num_workers = params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
                             shuffle=False, drop_last=True, num_workers = params.num_workers)
 
