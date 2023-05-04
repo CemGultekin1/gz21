@@ -103,7 +103,7 @@ parser.add_argument('--land_mask', type=str, default='None',
                     help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
 parser.add_argument('--domain', type=str, default="four_regions",
                     help="use 'global' for training on the whole globe")
-parser.add_argument('--num_workers', type=int, default=1,
+parser.add_argument('--num_workers', type=int, default=8,
                     help="number of workers")
 parser.add_argument('--optimizer', type=str, default="Adam",
                     help="either Adam or SGD supported")

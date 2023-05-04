@@ -37,6 +37,8 @@ setup-conda-env:
 		source /ext3/env.sh;
 		pip install -r requirements.txt;
 		pip install zarr xarray fsspec aiohttp requests;
+		pip install cftime;
+		python -m pip install "xarray[io]";
 	"
 setup-greene: 
 	make setup-miniconda
