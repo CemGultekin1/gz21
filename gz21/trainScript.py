@@ -103,8 +103,12 @@ parser.add_argument('--land_mask', type=str, default='None',
                     help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
 parser.add_argument('--domain', type=str, default="four_regions",
                     help="use 'global' for training on the whole globe")
-parser.add_argument('--num_workers', type=int, default=8,
-                    help="use 'global' for training on the whole globe")
+parser.add_argument('--num_workers', type=int, default=1,
+                    help="number of workers")
+parser.add_argument('--optimizer', type=str, default="Adam",
+                    help="either Adam or SGD supported")
+parser.add_argument('--batchnorm', type=int, default=0,
+                    help="use batchnormalization at every layer or not")
 params = parser.parse_args()
 
 if params.domain == "four_regions" and params.land_mask != "None":
@@ -189,7 +193,7 @@ def get_length(varname:str):
 def dataset_initiator(domain :str = "four_regions"):
     # Split into train and test datasets
     global_ds =  load_data_from_past()#load_data_from_run(params.run_id)
-    global_ds = global_ds.sel(yu_ocean = slice(-60,60))
+    global_ds = global_ds.sel(yu_ocean = slice(-85,85))
     global train_split,test_split,submodel
     datasets, train_datasets, test_datasets = list(), list(), list()
     if domain == "four_regions":
@@ -316,7 +320,7 @@ except AttributeError as e:
     raise type(e)('Could not find the specified model class: ' +
                 str(e))
     
-net = model_cls(2,4)#datasets[0].n_features, criterion.n_required_channels)
+net = model_cls(batch_norm = bool(params.batchnorm))#datasets[0].n_features, criterion.n_required_channels)
 try:
     transformation_cls = getattr(models.transforms, transformation_cls_name)
     transformation = transformation_cls()
@@ -362,10 +366,14 @@ net.to(device)
 
 # Optimizer and learning rate scheduler
 #optimizer = torch.optim.SGD(net.parameters(),lr = 0.1)#
-optimizer = optim.SGD(net.parameters(), learning_rates[0], weight_decay=weight_decay)
-print(optimizer)
-lr_scheduler = MultiStepLR(optimizer, list(learning_rates.keys())[1:],
-                        gamma=0.1)
+
+if params.optimizer == "Adam":
+    optimizer = optim.Adam(net.parameters(), learning_rates[0], weight_decay=weight_decay)
+    lr_scheduler = MultiStepLR(optimizer, list(learning_rates.keys())[1:],gamma=0.1)
+elif params.optimizer == "SGD":
+    optimizer = optim.SGD(net.parameters(), 1e-2,momentum = 0.9)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,factor=0.5,patience=2)
+    lr_scheduler = None
 
 
 trainer = Trainer(net, device,)#land_mask_type = params.land_mask)
@@ -392,11 +400,14 @@ for i_epoch in range(n_epochs):
         break
         
     test_loss, metrics_results = test
+    if params.optimizer == "SGD":
+        scheduler.step(test_loss)
     # Log the training loss
     print('Train loss for this epoch is ', train_loss)
     print('Test loss for this epoch is ', test_loss)
     print('Learning rate ', optimizer.param_groups[0]['lr'])
-
+    if optimizer.param_groups[0]['lr'] < 1e-8:
+        break
     for metric_name, metric_value in metrics_results.items():
         print('Test {} for this epoch is {}'.format(metric_name, metric_value))
     mlflow.log_metric('train loss', train_loss, i_epoch)
@@ -405,8 +416,6 @@ for i_epoch in range(n_epochs):
     
     full_path = os.path.join(data_location, models_directory, model_name)
     torch.save(net.state_dict(), full_path)
-    full_path = os.path.join(data_location, models_directory, 'final_transformation.pth')
-    torch.save(net.final_transformation, full_path)
     
 # Update the logged number of actual training epochs
 mlflow.log_param('n_epochs_actual', i_epoch + 1)

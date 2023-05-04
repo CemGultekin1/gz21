@@ -41,7 +41,7 @@ entry_points:
       train_split : {type : float, default : 0.6}
       test_split : {type : float, default : 0.7}
       time_indices : {type : string, default : 0}
-      print_every : {type : float, default : 20}
+      print_every : {type : float, default : 1}
       weight_decay : {type : float, default : 0}
       model_module_name : {type : string, default : models.models1}
       model_cls_name : {type : string, default : FullyCNN}
@@ -53,6 +53,8 @@ entry_points:
       targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
       domain : {type : string, default : four_regions}
       land_mask : {type : string, default : None}
+      optimizer : {type : string, default : "SGD"}
+      batchnorm : {type : int, default : 1}
       #{exp_id} {run_id} 
     command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} 
     --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} 
@@ -61,7 +63,8 @@ entry_points:
     --transformation_cls_name {transformation_cls_name} --submodel {submodel} 
     --features_transform_cls_name {features_transform_cls_name} 
     --targets_transform_cls_name {targets_transform_cls_name}
-    --domain {domain} --land_mask {land_mask}"
+    --domain {domain} --land_mask {land_mask} --optimizer {optimizer}
+    --batchnorm {batchnorm}"
   global-interior-train:
     parameters:
       # exp_id : {type: float, default: 0}
@@ -84,6 +87,8 @@ entry_points:
       targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
       domain : {type : string, default : global}
       land_mask : {type : string, default : interior}
+      optimizer : {type : string, default : "Adam"}
+      batchnorm : {type : int, default : 1}
     command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} 
     --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} 
     --time_indices {time_indices} --printevery {print_every} --weight_decay {weight_decay} 
@@ -91,7 +96,8 @@ entry_points:
     --transformation_cls_name {transformation_cls_name} --submodel {submodel} 
     --features_transform_cls_name {features_transform_cls_name} 
     --targets_transform_cls_name {targets_transform_cls_name}
-    --domain {domain} --land_mask {land_mask}"
+    --domain {domain} --land_mask {land_mask} --optimizer {optimizer}
+    --batchnorm {batchnorm}"
   global-train:
     parameters:
       # exp_id : {type: float, default: 0}
@@ -114,6 +120,8 @@ entry_points:
       targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
       domain : {type : string, default : global}
       land_mask : {type : string, default : default}
+      optimizer : {type : string, default : "Adam"}
+      batchnorm : {type : int, default : 1}
     command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} 
     --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} 
     --time_indices {time_indices} --printevery {print_every} --weight_decay {weight_decay} 
@@ -121,4 +129,5 @@ entry_points:
     --transformation_cls_name {transformation_cls_name} --submodel {submodel} 
     --features_transform_cls_name {features_transform_cls_name} 
     --targets_transform_cls_name {targets_transform_cls_name}
-    --domain {domain} --land_mask {land_mask}"
+    --domain {domain} --land_mask {land_mask} --optimizer {optimizer}
+    --batchnorm {batchnorm}"

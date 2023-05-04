@@ -374,6 +374,10 @@ class FullyCNN(DetectOutputSizeMixin, Sequential):
 
     def forward(self, x):
         x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
         # Temporary fix for the student loss
         return self.final_transformation(x)
 
