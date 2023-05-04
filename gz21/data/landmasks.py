@@ -50,7 +50,7 @@ def expand_for_cnn_spread(land_mask:xr.DataArray,cnn_field_of_view:int,mode:str 
 
 
 class CoarseGridLandMask:
-    def __init__(self,factor:int = 4,cnn_field_of_view:int = 21,torch_flag:bool = True,ylim:Tuple[int,int] = (-60,60)) -> None:
+    def __init__(self,factor:int = 4,cnn_field_of_view:int = 21,torch_flag:bool = True,ylim:Tuple[int,int] = (-85,85)) -> None:
         self.factor =factor
         self.cnn_field_of_view = cnn_field_of_view
         self._interior_land_mask = None
