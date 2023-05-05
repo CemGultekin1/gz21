@@ -103,7 +103,7 @@ parser.add_argument('--land_mask', type=str, default='None',
                     help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
 parser.add_argument('--domain', type=str, default="four_regions",
                     help="use 'global' for training on the whole globe")
-parser.add_argument('--num_workers', type=int, default=1,
+parser.add_argument('--num_workers', type=int, default=8,
                     help="number of workers")
 parser.add_argument('--optimizer', type=str, default="Adam",
                     help="either Adam or SGD supported")
@@ -353,7 +353,7 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True, num_workers = params.num_workers)
+                            shuffle=False, drop_last=True, num_workers = params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
                             shuffle=False, drop_last=True, num_workers = params.num_workers)
 
@@ -394,7 +394,7 @@ for i_epoch in range(n_epochs):
     # TODO remove clipping?
     train_loss = trainer.train_for_one_epoch(train_dataloader, optimizer,
                                             lr_scheduler, clip=1.)
-    test = trainer.test(test_dataloader)
+    test = trainer.test(train_dataloader)#test_dataloader)
     if test == 'EARLY_STOPPING':
         print(test)
         break

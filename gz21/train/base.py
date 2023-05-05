@@ -156,6 +156,8 @@ class Trainer:
             # bad for the climate, good for business 
             dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
             self.net(dummy)
+            # if i_batch==24:
+            #         break
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()
@@ -200,8 +202,9 @@ class Trainer:
                 Y_hat = self.criterion.predict(Y_hat)
                 for metric in self.metrics.values():
                     metric.update(Y_hat*M, Y*M)
-
-        test_loss = running_loss.value
+                # if i_batch==24:
+                #     break
+        test_loss = running_loss.average
         # Test early stopping
         if self._best_test_loss is None or test_loss < self._best_test_loss:
             self._best_test_loss = test_loss
