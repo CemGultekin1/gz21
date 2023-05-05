@@ -45,7 +45,7 @@ class Trainer:
         self._metrics = dict()
         self._print_loss_every = 20
         self._locked = False
-        self._early_stopping = 4
+        self._early_stopping = 1e3
         self._best_test_loss = None
         self._counter = 0
         
@@ -147,11 +147,11 @@ class Trainer:
                 running_loss_.reset()
             # Backpropagate
             loss.backward()
-            if clip:
+            if clip>0 and clip is not None:
                 clip_grad_norm_(self.net.parameters(), clip)
             # Update parameters
             optimizer.step()
-            
+
             # dummy gpu activity to avoid losing the gpu 
             # bad for the climate, good for business 
             dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
@@ -200,6 +200,7 @@ class Trainer:
                 Y_hat = self.criterion.predict(Y_hat)
                 for metric in self.metrics.values():
                     metric.update(Y_hat*M, Y*M)
+
         test_loss = running_loss.value
         # Test early stopping
         if self._best_test_loss is None or test_loss < self._best_test_loss:

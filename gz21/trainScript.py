@@ -103,7 +103,7 @@ parser.add_argument('--land_mask', type=str, default='None',
                     help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
 parser.add_argument('--domain', type=str, default="four_regions",
                     help="use 'global' for training on the whole globe")
-parser.add_argument('--num_workers', type=int, default=8,
+parser.add_argument('--num_workers', type=int, default=1,
                     help="number of workers")
 parser.add_argument('--optimizer', type=str, default="Adam",
                     help="either Adam or SGD supported")
@@ -400,12 +400,13 @@ for i_epoch in range(n_epochs):
         break
         
     test_loss, metrics_results = test
-    if params.optimizer == "SGD":
-        scheduler.step(test_loss)
+    
     # Log the training loss
     print('Train loss for this epoch is ', train_loss)
     print('Test loss for this epoch is ', test_loss)
     print('Learning rate ', optimizer.param_groups[0]['lr'])
+    if params.optimizer == "SGD":
+        scheduler.step(test_loss)
     if optimizer.param_groups[0]['lr'] < 1e-8:
         break
     for metric_name, metric_value in metrics_results.items():

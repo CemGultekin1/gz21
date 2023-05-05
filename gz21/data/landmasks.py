@@ -25,11 +25,6 @@ def expand_for_cnn_spread(land_mask:xr.DataArray,cnn_field_of_view:int,mode:str 
     elif mode == 'wrap':
         nplandmask = convolve2d(nplandmask,ones_sig,mode = 'same',boundary = 'wrap')
         nplandmask = np.where(nplandmask>0,1,0)
-        # spread = (cnn_field_of_view - 1)//2
-        # if spread > 0:
-        #     slc = slice(spread,-spread)
-        #     land_mask = land_mask.copy().isel(xu_ocean = slc,yu_ocean = slc)        
-        #     nplandmask= nplandmask[slc,slc]
         land_mask.data = nplandmask.reshape(land_mask.shape)
         return land_mask
     elif mode == "torch_pool":
