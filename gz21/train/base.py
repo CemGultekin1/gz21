@@ -154,7 +154,7 @@ class Trainer:
 
             # dummy gpu activity to avoid losing the gpu 
             # bad for the climate, good for business 
-            dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
+            dummy = torch.zeros([1,2,1000,1000]).to("cuda:0", dtype=torch.float)
             self.net(dummy)
             # if i_batch==24:
             #         break

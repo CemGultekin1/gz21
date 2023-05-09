@@ -84,7 +84,6 @@ class CoarseGridLandMask:
         masks.to_netcdf(self._memory_location)
         print(f'{self._memory_location} saved')
     def read_from_file(self,):
-        print(f'{self._memory_location} read')
         return xr.open_dataset(self._memory_location)
     @property
     def interior_land_mask(self,):

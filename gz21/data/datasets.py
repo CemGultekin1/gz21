@@ -693,7 +693,7 @@ class DatasetPartitioner:
         return l_subsets
 
 
-class ConcatDataset_(Dataset):
+class ConcatDataset_(ConcatDataset):
     """Extends the Pytorch Concat Dataset in two ways:
         - enforces (by default) the concatenated dataset to have the same
         shapes
@@ -702,9 +702,8 @@ class ConcatDataset_(Dataset):
         """
 
     def __init__(self, datasets, enforce_same_dims=True):
-        # super(ConcatDataset_, self).__init__(datasets)
+        super(ConcatDataset_, self).__init__(datasets)
         self.datasets = datasets
-        self._length = sum([len(ds) for ds in datasets])
         self.enforce_same_dims = enforce_same_dims
         if enforce_same_dims:
             heights = [dataset.height for dataset in self.datasets]
@@ -717,11 +716,11 @@ class ConcatDataset_(Dataset):
             dataset.add_targets_transform(crop_transform)
     def __len__(self,):
         return self._length
-    def __getitem__(self,i:int):
-        domi = i%len(self.datasets)
-        ti = i//len(self.datasets)
-        ti = ti % len(self.datasets[domi])
-        return self.datasets[domi][ti]
+    # def __getitem__(self,i:int):
+    #     domi = i%len(self.datasets)
+    #     ti = i//len(self.datasets)
+    #     ti = ti % len(self.datasets[domi])
+    #     return self.datasets[domi][ti]
 
     # def __getattr__(self, attr):
     #     if hasattr(self.datasets[0], attr):
