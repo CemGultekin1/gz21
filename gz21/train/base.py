@@ -120,6 +120,13 @@ class Trainer:
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
             Y_hat = self.net(X)
+            
+            # interrupt_dict = dict(
+            #     x = X,
+            #     y = Y
+            # )
+            # torch.save(interrupt_dict,f'train_interrupt_{i_batch}.pth')
+
             # Compute loss
             loss = self.criterion(Y_hat, Y)
             running_loss.update(loss.item(), X.size(0))
@@ -140,8 +147,9 @@ class Trainer:
             optimizer.step()
             
             # dummy gpu activity to avoid losing the gpu - bad for the climate, good for the business 
-            dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
-            self.net(dummy)
+            if torch.cuda.is_available():
+                dummy = torch.zeros([4,2,1000,1000]).to("cuda:0", dtype=torch.float)
+                self.net(dummy)
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()
