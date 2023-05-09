@@ -217,7 +217,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._lazy_init_flag = False
         self._transform_from_model_flag = False
         self._model = None
-        self._length = get_length(varname)
+        self._length = get_length(varname)*4
         self._subset = None
     def add_transforms_from_model(self,model):
         self._model = model
