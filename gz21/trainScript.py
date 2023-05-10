@@ -236,11 +236,19 @@ class LazyDatasetWrapper(ConcatDataset_):
             self.lazy__init__()
             self._lazy_init_flag = True
         return self._subset.datasets[0].inverse_transform_target(*args,**kwargs)
-    def __getitem__(self,*args):
+    def __getitem__(self,i):
         if not self._lazy_init_flag:
             self.lazy__init__()
             self._lazy_init_flag = True
-        return ConcatDataset.__getitem__(self,*args)
+        excpt = True
+        while excpt:
+            try:
+                x = ConcatDataset.__getitem__(self,i)
+                excpt = False
+            except:
+                i+=1
+                i = i%self._length
+        return x
     def __len__(self,):
         return self._length
 
