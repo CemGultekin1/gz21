@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --time=48:00:00
-#SBATCH --array=1
+#SBATCH --time=32:00:00
+#SBATCH --array=2-3
 #SBATCH --mem=60GB
 #SBATCH --job-name=gtrain
 #SBATCH --output=/scratch/cg3306/climate/subgrid/gz21/slurm/echo/gtrain_%A_%a.out
