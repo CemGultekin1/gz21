@@ -146,6 +146,7 @@ indices = params.time_indices
 # Other parameters
 print_loss_every = params.printevery
 model_name = 'trained_model.pth'
+best_model_name = 'best_trained_model.pth'
 
 # Directories where temporary data will be saved
 data_location = tempfile.mkdtemp(dir=TEMP)
@@ -275,22 +276,33 @@ class LazyDatasetWrapper(ConcatDataset_):
             self.lazy__init__()
             self._lazy_init_flag = True
         return self._subset.datasets[0].inverse_transform_target(*args,**kwargs)
-    def __getitem__(self,*args):
+    def __getitem__(self,i):
         if not self._lazy_init_flag:
             self.lazy__init__()
             self._lazy_init_flag = True
-        x,y = super().__getitem__(*args)
+        excpt = True
+        while excpt:
+            try:
+                x,y = ConcatDataset.__getitem__(self,i)
+                excpt = False
+            except:
+                i+=1
+                i = i%self._length
         x = np.where(np.isnan(x),0,x)
+        
         y = np.where(np.isnan(y),0,y)
         if self.land_mask is None:            
-            return x,y,y[:1]*0 + 1
+            return x,y#,y[:1]*0 + 1
         else:
             land_mask = self.land_mask
+            land_mask = np.where(land_mask == 0,np.nan,1)
+            
             spread = (land_mask.shape[1] - y.shape[1])//2
             if spread > 0:
                 spslc = slice(spread,-spread)
                 land_mask = land_mask[:,spslc,spslc]
-            return x,y,land_mask
+            y = y*land_mask
+            return x,y#,land_mask
     def __len__(self,):
         return self._length
 
@@ -348,12 +360,11 @@ train_dataset.add_transforms_from_model(net)
 test_dataset.add_transforms_from_model(net)
 
 
-
 print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True, num_workers = params.num_workers)
+                            shuffle=True, drop_last=True, num_workers = params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
                             shuffle=False, drop_last=True, num_workers = params.num_workers)
 
@@ -376,7 +387,7 @@ elif params.optimizer == "SGD":
     lr_scheduler = None
 
 
-trainer = Trainer(net, device,)#land_mask_type = params.land_mask)
+trainer = Trainer(net, device,dummy = params.domain == "four_regions")
 trainer.criterion = criterion
 trainer.print_loss_every = print_loss_every
 
@@ -407,7 +418,7 @@ for i_epoch in range(n_epochs):
     print('Learning rate ', optimizer.param_groups[0]['lr'])
     if params.optimizer == "SGD":
         scheduler.step(test_loss)
-    if optimizer.param_groups[0]['lr'] < 1e-8:
+    if optimizer.param_groups[0]['lr'] < 1e-6:
         break
     for metric_name, metric_value in metrics_results.items():
         print('Test {} for this epoch is {}'.format(metric_name, metric_value))
@@ -417,6 +428,10 @@ for i_epoch in range(n_epochs):
     
     full_path = os.path.join(data_location, models_directory, model_name)
     torch.save(net.state_dict(), full_path)
+    if trainer._best_test_loss == test_loss:
+        full_path = os.path.join(data_location, models_directory, best_model_name)
+        torch.save(net.state_dict(), full_path)
+        
     
 # Update the logged number of actual training epochs
 mlflow.log_param('n_epochs_actual', i_epoch + 1)

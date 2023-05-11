@@ -33,10 +33,10 @@ def load_paper_net(device: str = 'gpu'):
     model_cls = load_model_cls(model_module_name, model_cls_name)
     net = model_cls(2, 4)
     
-    tempfile = 'tmptsp2jxp1'#'tmputijzpt_'#
-    root = f'/scratch/cg3306/climate/subgrid/gz21/temp/{tempfile}/models'
-    if device == 'cpu':
-        transformation = torch.load(f'{root}/final_transformation.pth', map_location=torch.device('cpu'))
+    tempfile = 'tmpgbyo08g9'
+    root = f'/scratch/cg3306/climate/temp/gz21/temp/{tempfile}/models'
+    if device == 'gpu':
+        transformation = torch.load(f'{root}/transformation', map_location=torch.device('cpu'))
         print('After torch.load()')
         net.final_transformation = transformation
     print('After transformation')

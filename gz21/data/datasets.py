@@ -703,7 +703,6 @@ class ConcatDataset_(ConcatDataset):
 
     def __init__(self, datasets, enforce_same_dims=True):
         super(ConcatDataset_, self).__init__(datasets)
-        self.datasets = datasets
         self.enforce_same_dims = enforce_same_dims
         if enforce_same_dims:
             heights = [dataset.height for dataset in self.datasets]
@@ -714,8 +713,6 @@ class ConcatDataset_(ConcatDataset):
             crop_transform = CropToNewShape(self.height, self.width)
             dataset.add_features_transform(crop_transform)
             dataset.add_targets_transform(crop_transform)
-    def __len__(self,):
-        return self._length
     # def __getitem__(self,i:int):
     #     domi = i%len(self.datasets)
     #     ti = i//len(self.datasets)
