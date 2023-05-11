@@ -9,7 +9,7 @@ import mlflow
 import xarray as xr
 from yaml import Loader, Dumper,load
 from mlflow import MlflowClient
-from gz21.paths import COARSE_DATA_PATH
+from gz21.paths import COARSE_DATA_PATH,NEW_COARSE_DATA_PATH
 def find_latest_data_run()->dict:
     experiment_name = "data"
     runs = mlflow.search_runs(
@@ -18,7 +18,7 @@ def find_latest_data_run()->dict:
     )
     return runs.loc[len(runs)-1].to_dict()
 
-def load_data_from_past():
+def load_data_from_past_():
     data_file = COARSE_DATA_PATH
     xr_dataset = xr.open_zarr(data_file)
     xr_dataset = xr_dataset.rename(
@@ -32,6 +32,11 @@ def load_data_from_past():
         )
     ).drop('Stemp temp interior_wet_mask wet_density'.split()).isel(depth = 0)
     return xr_dataset#.isel(time= [0,1,2])
+
+def load_data_from_past():
+    data_file = NEW_COARSE_DATA_PATH
+    xr_dataset = xr.open_zarr(data_file)
+    return xr_dataset
 
 def load_data_from_run(run_id):
     data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing.zarr")

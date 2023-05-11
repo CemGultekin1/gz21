@@ -30,3 +30,4 @@ CM2P6_SURFACE_1PCT_CO2_UVT = os.path.join(LAB_CM2P6_PATH,'surface_1pct_co2.zarr'
 
 
 COARSE_DATA_PATH = '/scratch/cg3306/climate/outputs/data/coarse_4_surface_gaussian.zarr'
+NEW_COARSE_DATA_PATH = '/scratch/cg3306/climate/subgrid/gz21/mlruns/349448284336876277/5170f601b76840f9896585f0067e92ea/artifacts/forcing.zarr'
