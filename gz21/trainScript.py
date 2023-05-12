@@ -99,6 +99,8 @@ parser.add_argument('--targets_transform_cls_name', type=str, default='None',
                     help='Depreciated')
 parser.add_argument('--seed', type=int, default=0,
                     help='torch.manual_seed')
+parser.add_argument('--region', type=int, default=0,
+                    help='torch.manual_seed')
 params = parser.parse_args()
 
 # Log the experiment_id and run_id of the source dataset
@@ -184,6 +186,7 @@ def dataset_initiator():
     global train_split,test_split,submodel
     datasets, train_datasets, test_datasets = list(), list(), list()
     xr_datasets :List[xr.Dataset]= load_training_datasets(global_ds, 'gz21/training_subdomains.yaml')
+    xr_datasets = [xr_datasets[params.region]]
     for domain_id,xr_dataset in enumerate(xr_datasets):
         submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
         xr_dataset = submodel_transform.fit_transform(xr_dataset)
@@ -303,9 +306,9 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True, num_workers=8)
+                            shuffle=True, drop_last=True, num_workers=1)#8)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True, num_workers=8)
+                            shuffle=False, drop_last=True, num_workers=1)#8)
 
 
 
@@ -333,6 +336,7 @@ for metric_name, metric in metrics.items():
     trainer.register_metric(metric_name, metric)
 
 for i_epoch in range(n_epochs):
+    net.to(device)
     print('Epoch number {}.'.format(i_epoch))
     # TODO remove clipping?
     train_loss = trainer.train_for_one_epoch(train_dataloader, optimizer,
@@ -353,6 +357,10 @@ for i_epoch in range(n_epochs):
     mlflow.log_metric('train loss', train_loss, i_epoch)
     mlflow.log_metric('test loss', test_loss, i_epoch)
     mlflow.log_metrics(metrics_results)
+    
+    net.cpu()
+    full_path = os.path.join(data_location, models_directory, model_name)
+    torch.save(net.state_dict(), full_path)
 # Update the logged number of actual training epochs
 mlflow.log_param('n_epochs_actual', i_epoch + 1)
 

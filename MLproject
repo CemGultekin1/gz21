@@ -31,7 +31,7 @@ entry_points:
       global: {type: str, default: 1}
       num_cpus: {type: str, default: 4}
     command: "python gz21/cmip26.py {lat_min} {lat_max} {long_min} {long_max} --CO2 {CO2} --ntimes {ntimes} --factor {factor} --chunk_size {chunk_size} --global_ {global} --num_cpus {num_cpus}" 
-  train:
+  train-0:
     parameters:
       # exp_id : {type: float, default: 0}
       # run_id : {type: string}
@@ -50,6 +50,76 @@ entry_points:
       submodel : {type: string, default : transform3}
       features_transform_cls_name : {type : string, default : FixedVelocityNormalizer}
       targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
+      region : {type : int, default : 0}
       #{exp_id} {run_id} 
     command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} --time_indices {time_indices} --printevery {print_every} --weight_decay {weight_decay} --model_module_name {model_module_name} --model_cls_name {model_cls_name} --loss_cls_name {loss_cls_name}
-    --transformation_cls_name {transformation_cls_name} --submodel {submodel} --features_transform_cls_name {features_transform_cls_name} --targets_transform_cls_name {targets_transform_cls_name}"
+    --transformation_cls_name {transformation_cls_name} --submodel {submodel} --features_transform_cls_name {features_transform_cls_name} --targets_transform_cls_name {targets_transform_cls_name} --region {region}"
+  train-1:
+    parameters:
+      # exp_id : {type: float, default: 0}
+      # run_id : {type: string}
+      batchsize : {type : float, default : 4}
+      learning_rate : {type : string, default : 0 5e-4 10 5e-5 20 5e-6}
+      n_epochs : {type : float, default : 100}
+      train_split : {type : float, default : 0.6}
+      test_split : {type : float, default : 0.7}
+      time_indices : {type : string, default : 0}
+      print_every : {type : float, default : 20}
+      weight_decay : {type : float, default : 0}
+      model_module_name : {type : string, default : models.models1}
+      model_cls_name : {type : string, default : FullyCNN}
+      loss_cls_name : {type : string, default : HeteroskedasticGaussianLossV2}
+      transformation_cls_name : {type : string, default : SoftPlusTransform}
+      submodel : {type: string, default : transform3}
+      features_transform_cls_name : {type : string, default : FixedVelocityNormalizer}
+      targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
+      region : {type : int, default : 1}
+      #{exp_id} {run_id} 
+    command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} --time_indices {time_indices} --printevery {print_every} --weight_decay {weight_decay} --model_module_name {model_module_name} --model_cls_name {model_cls_name} --loss_cls_name {loss_cls_name}
+    --transformation_cls_name {transformation_cls_name} --submodel {submodel} --features_transform_cls_name {features_transform_cls_name} --targets_transform_cls_name {targets_transform_cls_name} --region {region}"
+  train-2:
+    parameters:
+      # exp_id : {type: float, default: 0}
+      # run_id : {type: string}
+      batchsize : {type : float, default : 4}
+      learning_rate : {type : string, default : 0 5e-4 10 5e-5 20 5e-6}
+      n_epochs : {type : float, default : 100}
+      train_split : {type : float, default : 0.6}
+      test_split : {type : float, default : 0.7}
+      time_indices : {type : string, default : 0}
+      print_every : {type : float, default : 20}
+      weight_decay : {type : float, default : 0}
+      model_module_name : {type : string, default : models.models1}
+      model_cls_name : {type : string, default : FullyCNN}
+      loss_cls_name : {type : string, default : HeteroskedasticGaussianLossV2}
+      transformation_cls_name : {type : string, default : SoftPlusTransform}
+      submodel : {type: string, default : transform3}
+      features_transform_cls_name : {type : string, default : FixedVelocityNormalizer}
+      targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
+      region : {type : int, default : 2}
+      #{exp_id} {run_id} 
+    command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} --time_indices {time_indices} --printevery {print_every} --weight_decay {weight_decay} --model_module_name {model_module_name} --model_cls_name {model_cls_name} --loss_cls_name {loss_cls_name}
+    --transformation_cls_name {transformation_cls_name} --submodel {submodel} --features_transform_cls_name {features_transform_cls_name} --targets_transform_cls_name {targets_transform_cls_name} --region {region}"
+  train-3:
+    parameters:
+      # exp_id : {type: float, default: 0}
+      # run_id : {type: string}
+      batchsize : {type : float, default : 4}
+      learning_rate : {type : string, default : 0 5e-4 10 5e-5 20 5e-6}
+      n_epochs : {type : float, default : 100}
+      train_split : {type : float, default : 0.6}
+      test_split : {type : float, default : 0.7}
+      time_indices : {type : string, default : 0}
+      print_every : {type : float, default : 20}
+      weight_decay : {type : float, default : 0}
+      model_module_name : {type : string, default : models.models1}
+      model_cls_name : {type : string, default : FullyCNN}
+      loss_cls_name : {type : string, default : HeteroskedasticGaussianLossV2}
+      transformation_cls_name : {type : string, default : SoftPlusTransform}
+      submodel : {type: string, default : transform3}
+      features_transform_cls_name : {type : string, default : FixedVelocityNormalizer}
+      targets_transform_cls_name : {type : string, default : FixedForcingNormalizer}
+      region : {type : int, default : 3}
+      #{exp_id} {run_id} 
+    command: "python gz21/trainScript.py --batchsize {batchsize} --learning_rate {learning_rate} --n_epochs {n_epochs} --train_split {train_split} --test_split {test_split} --time_indices {time_indices} --printevery {print_every} --weight_decay {weight_decay} --model_module_name {model_module_name} --model_cls_name {model_cls_name} --loss_cls_name {loss_cls_name}
+    --transformation_cls_name {transformation_cls_name} --submodel {submodel} --features_transform_cls_name {features_transform_cls_name} --targets_transform_cls_name {targets_transform_cls_name} --region {region}"
