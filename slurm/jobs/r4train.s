@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=48:00:00
+#SBATCH --time=32:00:00
 #SBATCH --array=1
 #SBATCH --mem=60GB
 #SBATCH --job-name=r4train

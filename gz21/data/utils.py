@@ -5,20 +5,20 @@ Created on Tue May 12 17:40:39 2020
 
 @author: arthur
 """
-import mlflow
+# import mlflow
 import xarray as xr
 from yaml import Loader, Dumper,load
-from mlflow import MlflowClient
+# from mlflow import MlflowClient
 from gz21.paths import COARSE_DATA_PATH,NEW_COARSE_DATA_PATH
-def find_latest_data_run()->dict:
-    experiment_name = "data"
-    runs = mlflow.search_runs(
-            experiment_names=[experiment_name],
-            filter_string = "tags.mlflow.runName = 'full'"
-    )
-    return runs.loc[len(runs)-1].to_dict()
+# def find_latest_data_run()->dict:
+#     experiment_name = "data"
+#     runs = mlflow.search_runs(
+#             experiment_names=[experiment_name],
+#             filter_string = "tags.mlflow.runName = 'full'"
+#     )
+#     return runs.loc[len(runs)-1].to_dict()
 
-def load_data_from_past_():
+def load_data_from_past():
     data_file = COARSE_DATA_PATH
     xr_dataset = xr.open_zarr(data_file)
     xr_dataset = xr_dataset.rename(
@@ -33,22 +33,22 @@ def load_data_from_past_():
     ).drop('Stemp temp interior_wet_mask wet_density'.split()).isel(depth = 0)
     return xr_dataset#.isel(time= [0,1,2])
 
-def load_data_from_past():
+def load_data_from_past_():
     data_file = NEW_COARSE_DATA_PATH
     xr_dataset = xr.open_zarr(data_file)
     return xr_dataset
 
-def load_data_from_run(run_id):
-    data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing.zarr")
-    xr_dataset = xr.open_zarr(data_file)
-    return xr_dataset
+# def load_data_from_run(run_id):
+#     data_file =  mlflow.artifacts.download_artifacts(run_id = run_id,artifact_path = "forcing.zarr")
+#     xr_dataset = xr.open_zarr(data_file)
+#     return xr_dataset
 
 
-def load_data_from_runs(run_ids):
-    xr_datasets = list()
-    for run_id in run_ids:
-        xr_datasets.append(load_data_from_run(run_id))
-    return xr_datasets
+# def load_data_from_runs(run_ids):
+#     xr_datasets = list()
+#     for run_id in run_ids:
+#         xr_datasets.append(load_data_from_run(run_id))
+#     return xr_datasets
 
 
 def load_training_datasets(ds: xr.Dataset, config_fname: str):
