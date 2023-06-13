@@ -12,16 +12,22 @@ def main():
         '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199952_1.out',
         
     ]
+    
     paths = [
         '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
         '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
         '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out',
     ]
+    paths = [        
+        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
+        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
+        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out'
+    ]
+
     labels = [
-        'may11-1',
-        'may11-2',
-        'may11-3',
-          
+        'cem_20230511_1_four_regions_fixed_branch',   
+        'cem_20230512_four_regions_fixed_branch',
+        'cem_20230512_1_four_regions_fixed_branch',         
     ]
     fig,axs = plt.subplots(len(paths),3,figsize = (20,30))
     titles = [
