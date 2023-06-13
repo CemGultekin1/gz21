@@ -13,21 +13,19 @@ import os.path
 import tempfile
 import xarray as xr
 
-from torch.utils.data import DataLoader,Dataset,ConcatDataset
+from torch.utils.data import DataLoader,ConcatDataset
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 import torch.nn
-import torch.nn.functional as F
 
 # These imports are used to create the training datasets
 from data.datasets import (DatasetWithTransform, DatasetTransformer,
                            RawDataFromXrDataset, ConcatDataset_,
-                           Subset_, ComposeTransforms, MultipleTimeIndices)
+                           Subset_, ComposeTransforms)
 
 # Some utils functions
-from train.utils import (DEVICE_TYPE, learning_rates_from_string,
-                         run_ids_from_string, list_from_string)
-from data.utils import load_data_from_past, load_training_datasets, load_data_from_run,find_latest_data_run
+from train.utils import DEVICE_TYPE, learning_rates_from_string
+from data.utils import load_data_from_past, load_training_datasets
 from testing.utils import create_test_dataset
 from testing.metrics import MSEMetric, MaxMetric
 from train.base import Trainer
@@ -36,17 +34,12 @@ import models.transforms
 
 import argparse
 import importlib
-import pickle
-
-from data.xrtransforms import SeasonalStdizer
-
 import models.submodels
-import sys
+
 
 import copy
 
 from utils import TaskInfo
-from dask.diagnostics import ProgressBar
 
 
 def negative_int(value: str):
@@ -246,6 +239,8 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._model = model
     def lazy__init__(self,):
         train_dataset,test_dataset,datasets,_,_ = dataset_initiator(**self._init_kwargs)
+        print(train_dataset)
+        raise Exception
         if self.varname == "train_dataset":
             subset =  train_dataset
         else:
@@ -256,7 +251,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._subset = subset
         if self._land_mask  != "None":
             from gz21.data.landmasks import CoarseGridLandMask
-            self.cglm = CoarseGridLandMask()#cnn_field_of_view=25,)
+            self.cglm = CoarseGridLandMask()
         else:
             self.cglm = None
     @property
@@ -302,6 +297,8 @@ class LazyDatasetWrapper(ConcatDataset_):
                 spslc = slice(spread,-spread)
                 land_mask = land_mask[:,spslc,spslc]
             y = y*land_mask
+            print(y.shape)
+            print(x.shape)
             return x,y#,land_mask
     def __len__(self,):
         return self._length

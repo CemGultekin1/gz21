@@ -11,7 +11,6 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from time import time
 from .utils import print_every, RunningAverage
-from gz21.data.landmasks import CoarseGridLandMask
 
 class Trainer:
     """Training object for a neural network on a specific device.
