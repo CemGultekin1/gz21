@@ -7,6 +7,7 @@ TODO list
 balance the weights when mixing data sets
 
 """
+from gz21.data.landmasks import CoarseGridLandMask
 import torch
 from torch.utils.data import Dataset, DataLoader, ConcatDataset, Subset
 import numpy as np
@@ -440,7 +441,19 @@ class RawDataFromXrDataset(Dataset):
     def add_input(self, varname: str):
         self._check_varname(varname)
         self._input_arrays.append(varname)
-
+    def add_landmask_input(self,):
+        
+        
+        xmin = self.xr_dataset.xu_ocean[0].values
+        xmax = self.xr_dataset.xu_ocean[-1].values
+        ymin = self.xr_dataset.yu_ocean[0].values
+        ymax = self.xr_dataset.yu_ocean[-1].values
+        landmask = CoarseGridLandMask(cnn_field_of_view=1).read_from_file().default
+        landmask.name = 'landmask'
+        landmask = landmask.sel(xu_ocean = slice(xmin,xmax),yu_ocean = slice(ymin,ymax))
+        self.xr_dataset = xr.merge([landmask,self.xr_dataset])
+        self._input_arrays.append(landmask.name)
+        
     @property
     def width(self):
         dims = self.xr_dataset.dims

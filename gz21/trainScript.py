@@ -12,22 +12,20 @@ import mlflow
 import os.path
 import tempfile
 import xarray as xr
-
-from torch.utils.data import DataLoader,Dataset,ConcatDataset
+from gz21.data.landmasks import CoarseGridLandMask
+from torch.utils.data import DataLoader,ConcatDataset
 import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 import torch.nn
-import torch.nn.functional as F
 
 # These imports are used to create the training datasets
 from data.datasets import (DatasetWithTransform, DatasetTransformer,
                            RawDataFromXrDataset, ConcatDataset_,
-                           Subset_, ComposeTransforms, MultipleTimeIndices)
+                           Subset_, ComposeTransforms)
 
 # Some utils functions
-from train.utils import (DEVICE_TYPE, learning_rates_from_string,
-                         run_ids_from_string, list_from_string)
-from data.utils import load_data_from_past, load_training_datasets, load_data_from_run,find_latest_data_run
+from train.utils import DEVICE_TYPE, learning_rates_from_string
+from data.utils import load_data_from_past, load_training_datasets
 from testing.utils import create_test_dataset
 from testing.metrics import MSEMetric, MaxMetric
 from train.base import Trainer
@@ -36,17 +34,12 @@ import models.transforms
 
 import argparse
 import importlib
-import pickle
-
-from data.xrtransforms import SeasonalStdizer
-
 import models.submodels
-import sys
+
 
 import copy
 
 from utils import TaskInfo
-from dask.diagnostics import ProgressBar
 
 
 def negative_int(value: str):
@@ -206,9 +199,11 @@ def dataset_initiator(domain :str = "four_regions"):
         submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
         xr_dataset = submodel_transform.fit_transform(xr_dataset)
         dataset = RawDataFromXrDataset(xr_dataset)
+        
         dataset.index = 'time'
         dataset.add_input('usurf')
         dataset.add_input('vsurf')
+        dataset.add_landmask_input()
         dataset.add_output('S_x')
         dataset.add_output('S_y')
         # TODO temporary addition, should be made more general
@@ -255,8 +250,8 @@ class LazyDatasetWrapper(ConcatDataset_):
         self.__dict__.update(subset.__dict__)
         self._subset = subset
         if self._land_mask  != "None":
-            from gz21.data.landmasks import CoarseGridLandMask
-            self.cglm = CoarseGridLandMask()#cnn_field_of_view=25,)
+            
+            self.cglm = CoarseGridLandMask()
         else:
             self.cglm = None
     @property
@@ -292,7 +287,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         
         y = np.where(np.isnan(y),0,y)
         if self.land_mask is None:            
-            return x,y#,y[:1]*0 + 1
+            return x,y
         else:
             land_mask = self.land_mask
             land_mask = np.where(land_mask == 0,np.nan,1)
@@ -302,7 +297,7 @@ class LazyDatasetWrapper(ConcatDataset_):
                 spslc = slice(spread,-spread)
                 land_mask = land_mask[:,spslc,spslc]
             y = y*land_mask
-            return x,y#,land_mask
+            return x,y
     def __len__(self,):
         return self._length
 
@@ -364,9 +359,9 @@ print('Size of training data: {}'.format(len(train_dataset)))
 print('Size of validation data : {}'.format(len(test_dataset)))
 # Dataloaders
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                            shuffle=True, drop_last=True, num_workers = params.num_workers)
+                            shuffle=True, drop_last=True, num_workers = 1)#params.num_workers)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
-                            shuffle=False, drop_last=True, num_workers = params.num_workers)
+                            shuffle=False, drop_last=True, num_workers = 1)#params.num_workers)
 
 
 

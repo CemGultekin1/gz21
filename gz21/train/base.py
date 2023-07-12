@@ -11,7 +11,6 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from time import time
 from .utils import print_every, RunningAverage
-from gz21.data.landmasks import CoarseGridLandMask
 
 class Trainer:
     """Training object for a neural network on a specific device.
@@ -120,8 +119,7 @@ class Trainer:
             # Move batch to the GPU (if possible)
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
-            # M = batch[2].to(self._device, dtype=torch.float)
-            # print(X.shape,Y.shape,M.shape)
+            # print(X.shape,Y.shape)
             # RX = torch.randn(X.shape)
             # RX[X!=0] = 0
             # Y_hat = self.net(RX)
@@ -130,10 +128,9 @@ class Trainer:
             # Compute loss
             loss =  self.criterion(Y_hat, Y)
             
-            # torchdict = dict(input =X, true_result = Y, output = Y_hat, mask = M,loss = loss.detach().item(), **self.net.state_dict())
+            # torchdict = dict(input =X, true_result = Y, output = Y_hat, loss = loss.detach().item(), **self.net.state_dict())
             # torch.save(torchdict,f'train_interrupt_{i_batch}_.pth')
-            # if i_batch == 12:
-            #     raise Exception
+            # raise Exception
             
             
             running_loss.update(loss.item(), X.size(0))
@@ -154,7 +151,7 @@ class Trainer:
             optimizer.step()
             # dummy gpu activity to avoid losing the gpu 
             # bad for the climate, good for business 
-            if self.dummy:
+            if self.dummy and torch.cuda.is_available():
                 dummy = torch.zeros([1,2,1000,1000]).to("cuda:0", dtype=torch.float)
                 self.net.eval()
                 with torch.no_grad():

@@ -333,7 +333,7 @@ class Divergence2d(Module):
 
 
 class FullyCNN(DetectOutputSizeMixin, Sequential):
-    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+    def __init__(self, n_in_channels: int = 3, n_out_channels: int = 4,
                  padding=None, batch_norm=False):
         if padding is None:
             padding_5 = 0
