@@ -296,7 +296,7 @@ class LazyDatasetWrapper(ConcatDataset_):
             if spread > 0:
                 spslc = slice(spread,-spread)
                 land_mask = land_mask[:,spslc,spslc]
-            y = y*land_mask
+            # y = y*land_mask
             return x,y
     def __len__(self,):
         return self._length
