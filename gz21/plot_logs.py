@@ -4,30 +4,41 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    paths = [
-        '/scratch/cg3306/climate/subgrid/gz21/slurm/echo/train_32889750_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33168641_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199949_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199951_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199952_1.out',
+    # paths = [
+    #     '/scratch/cg3306/climate/subgrid/gz21/slurm/echo/train_32889750_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33168641_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199949_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199951_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199952_1.out',
         
+    # ]
+    
+    # paths = [
+    #     '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out',
+    # ]
+    # paths = [        
+    #     '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
+    #     '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out'
+    # ]
+
+    paths = [        
+        '/scratch/cz3056/CNN_train/Arthur_model/gz21/slurm/echo/gtrain_35529888_1.out',
+        '/scratch/cz3056/CNN_train/Arthur_model/gz21/slurm/echo/gtrain_35625547_1.out'
     ]
     
-    paths = [
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out',
-    ]
-    paths = [        
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out'
-    ]
+
+    # labels = [
+    #     'cem_20230511_1_four_regions_fixed_branch',   
+    #     'cem_20230512_four_regions_fixed_branch',
+    #     'cem_20230512_1_four_regions_fixed_branch',         
+    # ]
 
     labels = [
-        'cem_20230511_1_four_regions_fixed_branch',   
-        'cem_20230512_four_regions_fixed_branch',
-        'cem_20230512_1_four_regions_fixed_branch',         
+        'global_landmasks_1', 
+        'global_landmasks_2'        
     ]
     fig,axs = plt.subplots(len(paths),3,figsize = (20,30))
     titles = [
@@ -49,7 +60,7 @@ def main():
             axs[j,i].plot(v1,label = label)
             axs[j,i].grid()
             axs[j,i].set_title(f"{label} - {titles[i]}")
-    fig.savefig('logs_four_regions_fixed.png')
+    fig.savefig('logs_global.png')
         # continue
         # log1 = read_log(paths[0])
         # log2 = read_log(paths[1])
@@ -70,7 +81,7 @@ def main():
         # axs[0,i].semilogy(diff[:16],'*')
         # axs[0,i].set_xlabel(xlabels[i])
         # axs[0,i].set_title(titles[i] + ' difference - first 16 values')
-    fig.savefig('logs.png')
+    # fig.savefig('logs.png')
     
 def read_log(path):
     with open(path,'r') as f:

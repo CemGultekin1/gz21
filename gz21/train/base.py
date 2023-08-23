@@ -11,6 +11,8 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from time import time
 from .utils import print_every, RunningAverage
+#Cheng
+from typing import Tuple
 
 class Trainer:
     """Training object for a neural network on a specific device.
@@ -132,6 +134,99 @@ class Trainer:
             # torch.save(torchdict,f'train_interrupt_{i_batch}_.pth')
             # raise Exception
             
+            
+            running_loss.update(loss.item(), X.size(0))
+            running_loss_.update(loss.item(), X.size(0))
+            # Print current loss
+            loss_text = 'Loss value {}'.format(running_loss_.average)
+            tr = time()
+            avgtime = (tr-st)/(i_batch+1)
+            loss_text += f',\t avg per batch-time = {avgtime}'
+            if print_every(loss_text, self.print_loss_every, i_batch):
+                # Every time we print we reset the running average
+                running_loss_.reset()
+            # Backpropagate
+            loss.backward()
+            if clip>0 and clip is not None:
+                clip_grad_norm_(self.net.parameters(), clip)
+            # Update parameters
+            optimizer.step()
+            # dummy gpu activity to avoid losing the gpu 
+            # bad for the climate, good for business 
+            if self.dummy and torch.cuda.is_available():
+                dummy = torch.zeros([1,2,1000,1000]).to("cuda:0", dtype=torch.float)
+                self.net.eval()
+                with torch.no_grad():
+                    self.net(dummy)
+                self.net.train()
+            # if i_batch==4:
+            #     break
+            #         raise Exception
+        # Update the learning rate via the scheduler
+        if scheduler is not None:
+            scheduler.step()
+        return running_loss.value
+    
+    #Cheng
+    def train_for_one_epoch_gyre(self, dataloaders: Tuple[DataLoader,DataLoader], optimizer,
+                            scheduler=None, clip: float = None) -> float:
+        """Trains the neural network for one epoch.
+
+        Training uses the data provided through the dataloader passed as an
+        argument, and the optimizer passed as an argument.
+
+        Parameters
+        ----------
+        dataloader : DataLoader,
+            The Pytorch DataLoader object used to provide training data.
+
+        optimizer : Optimizer,
+            The Pytorch Optimizer used to update the parameters after each
+            forward-backward pass.
+
+        clip : float,
+            Value used to clipp gradients. Default is None, in which case
+            no clipping of gradients.
+
+        Returns
+        -------
+        float
+            The average train loss for this epoch.
+        """
+        self.net.train()
+        self._locked = True
+        running_loss = RunningAverage()
+        running_loss_ = RunningAverage()
+        cm2p6_dataloader,dgyre_dataloader = dataloaders
+        st = time()
+        cm2p6_dataloader_iter = cm2p6_dataloader.__iter__()
+        dgyre_dataloader_iter = dgyre_dataloader.__iter__()
+        i_batch = -1
+        while True:
+            i_batch += 1
+            try:
+                batch = cm2p6_dataloader_iter.__next__()
+            except:
+                break
+            self.net.zero_grad()
+            # Move batch to the GPU (if possible)
+            X = batch[0].to(self._device, dtype=torch.float)
+            Y = batch[1].to(self._device, dtype=torch.float)
+            Y_hat = self.net(X)
+            loss1 =  self.criterion(Y_hat, Y)
+            
+
+            try:
+                batch = dgyre_dataloader_iter.__next__()
+            except:
+                dgyre_dataloader_iter = dgyre_dataloader.__iter__()
+                batch = dgyre_dataloader_iter.__next__()
+            X = batch[0].to(self._device, dtype=torch.float)
+            Y = batch[1].to(self._device, dtype=torch.float)
+            Y_hat = self.net(X)
+            loss2 =  self.criterion(Y_hat, Y)
+            
+            loss = (loss1 + loss2)/2.
             
             running_loss.update(loss.item(), X.size(0))
             running_loss_.update(loss.item(), X.size(0))

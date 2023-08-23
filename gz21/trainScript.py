@@ -36,6 +36,10 @@ import argparse
 import importlib
 import models.submodels
 
+# Cheng
+from gz21.paths import GRID_DATA 
+from dask.diagnostics import ProgressBar
+
 
 import copy
 
@@ -194,16 +198,32 @@ def dataset_initiator(domain :str = "four_regions"):
         xr_datasets :List[xr.Dataset]= load_training_datasets(global_ds, 'gz21/training_subdomains.yaml')
     else:
         assert domain == "global"
+        # Cheng
+        grid_data = xr.open_dataset(GRID_DATA)
+        grid_data = grid_data.sel(yu_ocean = slice(-85,85))
+        grid_data = grid_data.fillna(0.0)
+        grid_data = grid_data.reset_coords()[['hu', 'area_u']]
+        grid_data  = grid_data.chunk(chunks = dict(xu_ocean = (-1)))
+        grid_data = grid_data.coarsen(dict(xu_ocean=4,
+                                    yu_ocean=4),
+                                    boundary='trim').mean()
+        with ProgressBar():
+             grid_data = grid_data.compute()
+        grid_data['hu'].attrs['type'] = 'input'
+        expanded_hu = grid_data['hu'].broadcast_like(global_ds.usurf)
+        global_ds = global_ds.assign(hu=expanded_hu/6000) #maximum depth is around 6000, normalize the depth to [0,1]
+        
         xr_datasets = [global_ds]
     for domain_id,xr_dataset in enumerate(xr_datasets):
         submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
         xr_dataset = submodel_transform.fit_transform(xr_dataset)
-        dataset = RawDataFromXrDataset(xr_dataset)
+        dataset = RawDataFromXrDataset(xr_dataset)            
         
         dataset.index = 'time'
         dataset.add_input('usurf')
         dataset.add_input('vsurf')
-        dataset.add_landmask_input()
+        dataset.add_input('hu') # Cheng
+        # dataset.add_landmask_input() # Cheng
         dataset.add_output('S_x')
         dataset.add_output('S_y')
         # TODO temporary addition, should be made more general
@@ -290,13 +310,14 @@ class LazyDatasetWrapper(ConcatDataset_):
             return x,y
         else:
             land_mask = self.land_mask
-            land_mask = np.where(land_mask == 0,np.nan,1)
+            # land_mask = np.where(land_mask == 0,np.nan,1) #Cheng
+            land_mask = np.where(land_mask == 0,0,1) #Cheng
             
             spread = (land_mask.shape[1] - y.shape[1])//2
             if spread > 0:
                 spslc = slice(spread,-spread)
                 land_mask = land_mask[:,spslc,spslc]
-            y = y*land_mask
+            y = y*land_mask #Cheng
             return x,y
     def __len__(self,):
         return self._length

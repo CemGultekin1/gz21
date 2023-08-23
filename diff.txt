@@ -1,0 +1,237 @@
+diff --git a/coarse_interior_land_mask.png b/coarse_interior_land_mask.png
+deleted file mode 100644
+index 342a89e..0000000
+Binary files a/coarse_interior_land_mask.png and /dev/null differ
+diff --git a/coarse_interior_land_mask_expanded.png b/coarse_interior_land_mask_expanded.png
+deleted file mode 100644
+index 0b844d9..0000000
+Binary files a/coarse_interior_land_mask_expanded.png and /dev/null differ
+diff --git a/coarse_land_mask.png b/coarse_land_mask.png
+deleted file mode 100644
+index 570c11f..0000000
+Binary files a/coarse_land_mask.png and /dev/null differ
+diff --git a/coarse_land_mask_expanded.png b/coarse_land_mask_expanded.png
+deleted file mode 100644
+index 03618e7..0000000
+Binary files a/coarse_land_mask_expanded.png and /dev/null differ
+diff --git a/gz21/data/datasets.py b/gz21/data/datasets.py
+index 2f61b0c..752c8ba 100644
+--- a/gz21/data/datasets.py
++++ b/gz21/data/datasets.py
+@@ -7,7 +7,6 @@ TODO list
+ balance the weights when mixing data sets
+ 
+ """
+-from gz21.data.landmasks import CoarseGridLandMask
+ import torch
+ from torch.utils.data import Dataset, DataLoader, ConcatDataset, Subset
+ import numpy as np
+@@ -441,19 +440,7 @@ class RawDataFromXrDataset(Dataset):
+     def add_input(self, varname: str):
+         self._check_varname(varname)
+         self._input_arrays.append(varname)
+-    def add_landmask_input(self,):
+-        
+-        
+-        xmin = self.xr_dataset.xu_ocean[0].values
+-        xmax = self.xr_dataset.xu_ocean[-1].values
+-        ymin = self.xr_dataset.yu_ocean[0].values
+-        ymax = self.xr_dataset.yu_ocean[-1].values
+-        landmask = CoarseGridLandMask(cnn_field_of_view=1).read_from_file().default
+-        landmask.name = 'landmask'
+-        landmask = landmask.sel(xu_ocean = slice(xmin,xmax),yu_ocean = slice(ymin,ymax))
+-        self.xr_dataset = xr.merge([landmask,self.xr_dataset])
+-        self._input_arrays.append(landmask.name)
+-        
++
+     @property
+     def width(self):
+         dims = self.xr_dataset.dims
+diff --git a/gz21/data/landmasks.py b/gz21/data/landmasks.py
+index 7110eeb..62049e0 100644
+--- a/gz21/data/landmasks.py
++++ b/gz21/data/landmasks.py
+@@ -68,15 +68,8 @@ class CoarseGridLandMask:
+         interior_land_mask = xr.where(interior_land_mask>0,1,0)
+         interior_land_mask = interior_land_mask.sel(yu_ocean = slice(self.ylim[0],self.ylim[1]))
+         _interior_land_mask = 1 - expand_for_cnn_spread(interior_land_mask,self.cnn_field_of_view,mode = self.mode)
+-        
+-        
+-        
+-        patch_data, _ = get_patch_from_file(1,None,0,'usurf', 'vsurf') 
+-        for key in patch_data.keys():
+-            patch_data[key] = xr.where(np.isnan(patch_data[key]), 1,0)
+         usurf = patch_data.usurf
+         usurf = usurf.coarsen({'xu_ocean': int(self.factor),'yu_ocean': int(self.factor)},boundary='trim')
+-        
+         land_density = usurf.mean()
+         land_mask = xr.where(land_density >= 0.5,1,0)
+         land_mask = land_mask.sel(yu_ocean = slice(self.ylim[0],self.ylim[1]))
+@@ -141,7 +134,6 @@ def main():
+     plt.savefig('coarse_interior_land_mask.png')
+     plt.close()
+     
+-    cglm.land_mask.plot()
+     plt.savefig('coarse_land_mask.png')
+     plt.close()
+     
+diff --git a/gz21/models/models1.py b/gz21/models/models1.py
+index e3778c2..d949fc8 100755
+--- a/gz21/models/models1.py
++++ b/gz21/models/models1.py
+@@ -333,7 +333,7 @@ class Divergence2d(Module):
+ 
+ 
+ class FullyCNN(DetectOutputSizeMixin, Sequential):
+-    def __init__(self, n_in_channels: int = 3, n_out_channels: int = 4,
++    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                  padding=None, batch_norm=False):
+         if padding is None:
+             padding_5 = 0
+diff --git a/gz21/plot_train_interruption.py b/gz21/plot_train_interruption.py
+deleted file mode 100644
+index 8358dbe..0000000
+--- a/gz21/plot_train_interruption.py
++++ /dev/null
+@@ -1,19 +0,0 @@
+-import matplotlib.pyplot as plt
+-import torch
+-import itertools
+-import numpy as np
+-def main():
+-    filename = 'train_interrupt_0_.pth'
+-    tip = torch.load(filename)
+-    print(list(tip.keys()))
+-    inp = tip['input'].numpy()
+-    print(inp.shape)
+-    shps = inp.shape[:2]
+-    rngs = [range(shp) for shp in shps]
+-    fig,axs = plt.subplots(shps[0],shps[1],figsize = (shps[1]*6,shps[0]*4))
+-    for i,j in itertools.product(*rngs):
+-        img = inp[i,j]
+-        axs[i,j].imshow(img)
+-    fig.savefig('train_interruption.png')
+-if __name__ == '__main__':
+-    main()
+\ No newline at end of file
+diff --git a/gz21/train/base.py b/gz21/train/base.py
+index 1662c4b..89029ea 100755
+--- a/gz21/train/base.py
++++ b/gz21/train/base.py
+@@ -119,7 +119,8 @@ class Trainer:
+             # Move batch to the GPU (if possible)
+             X = batch[0].to(self._device, dtype=torch.float)
+             Y = batch[1].to(self._device, dtype=torch.float)
+-            # print(X.shape,Y.shape)
++            # M = batch[2].to(self._device, dtype=torch.float)
++            # print(X.shape,Y.shape,M.shape)
+             # RX = torch.randn(X.shape)
+             # RX[X!=0] = 0
+             # Y_hat = self.net(RX)
+@@ -128,9 +129,10 @@ class Trainer:
+             # Compute loss
+             loss =  self.criterion(Y_hat, Y)
+             
+-            # torchdict = dict(input =X, true_result = Y, output = Y_hat, loss = loss.detach().item(), **self.net.state_dict())
++            # torchdict = dict(input =X, true_result = Y, output = Y_hat, mask = M,loss = loss.detach().item(), **self.net.state_dict())
+             # torch.save(torchdict,f'train_interrupt_{i_batch}_.pth')
+-            # raise Exception
++            # if i_batch == 12:
++            #     raise Exception
+             
+             
+             running_loss.update(loss.item(), X.size(0))
+@@ -151,7 +153,7 @@ class Trainer:
+             optimizer.step()
+             # dummy gpu activity to avoid losing the gpu 
+             # bad for the climate, good for business 
+-            if self.dummy and torch.cuda.is_available():
++            if self.dummy:
+                 dummy = torch.zeros([1,2,1000,1000]).to("cuda:0", dtype=torch.float)
+                 self.net.eval()
+                 with torch.no_grad():
+diff --git a/gz21/trainScript.py b/gz21/trainScript.py
+index c4353b9..7bffe76 100755
+--- a/gz21/trainScript.py
++++ b/gz21/trainScript.py
+@@ -12,7 +12,7 @@ import mlflow
+ import os.path
+ import tempfile
+ import xarray as xr
+-from gz21.data.landmasks import CoarseGridLandMask
++
+ from torch.utils.data import DataLoader,ConcatDataset
+ import torch.optim as optim
+ from torch.optim.lr_scheduler import MultiStepLR
+@@ -199,11 +199,9 @@ def dataset_initiator(domain :str = "four_regions"):
+         submodel_transform = copy.deepcopy(getattr(models.submodels, submodel))
+         xr_dataset = submodel_transform.fit_transform(xr_dataset)
+         dataset = RawDataFromXrDataset(xr_dataset)
+-        
+         dataset.index = 'time'
+         dataset.add_input('usurf')
+         dataset.add_input('vsurf')
+-        dataset.add_landmask_input()
+         dataset.add_output('S_x')
+         dataset.add_output('S_y')
+         # TODO temporary addition, should be made more general
+@@ -241,6 +239,8 @@ class LazyDatasetWrapper(ConcatDataset_):
+         self._model = model
+     def lazy__init__(self,):
+         train_dataset,test_dataset,datasets,_,_ = dataset_initiator(**self._init_kwargs)
++        print(train_dataset)
++        raise Exception
+         if self.varname == "train_dataset":
+             subset =  train_dataset
+         else:
+@@ -250,7 +250,7 @@ class LazyDatasetWrapper(ConcatDataset_):
+         self.__dict__.update(subset.__dict__)
+         self._subset = subset
+         if self._land_mask  != "None":
+-            
++            from gz21.data.landmasks import CoarseGridLandMask
+             self.cglm = CoarseGridLandMask()
+         else:
+             self.cglm = None
+@@ -287,7 +287,7 @@ class LazyDatasetWrapper(ConcatDataset_):
+         
+         y = np.where(np.isnan(y),0,y)
+         if self.land_mask is None:            
+-            return x,y
++            return x,y#,y[:1]*0 + 1
+         else:
+             land_mask = self.land_mask
+             land_mask = np.where(land_mask == 0,np.nan,1)
+@@ -297,7 +297,9 @@ class LazyDatasetWrapper(ConcatDataset_):
+                 spslc = slice(spread,-spread)
+                 land_mask = land_mask[:,spslc,spslc]
+             y = y*land_mask
+-            return x,y
++            print(y.shape)
++            print(x.shape)
++            return x,y#,land_mask
+     def __len__(self,):
+         return self._length
+ 
+@@ -359,9 +361,9 @@ print('Size of training data: {}'.format(len(train_dataset)))
+ print('Size of validation data : {}'.format(len(test_dataset)))
+ # Dataloaders
+ train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
+-                            shuffle=True, drop_last=True, num_workers = 1)#params.num_workers)
++                            shuffle=True, drop_last=True, num_workers = params.num_workers)
+ test_dataloader = DataLoader(test_dataset, batch_size=batch_size,
+-                            shuffle=False, drop_last=True, num_workers = 1)#params.num_workers)
++                            shuffle=False, drop_last=True, num_workers = params.num_workers)
+ 
+ 
+ 
+diff --git a/landmasks/6926979472687498625.nc b/landmasks/6926979472687498625.nc
+index 951ab9f..1988c6e 100644
+Binary files a/landmasks/6926979472687498625.nc and b/landmasks/6926979472687498625.nc differ
+diff --git a/landmasks/7123070201810141010.nc b/landmasks/7123070201810141010.nc
+index e7969c6..9135294 100644
+Binary files a/landmasks/7123070201810141010.nc and b/landmasks/7123070201810141010.nc differ
+diff --git a/train_interruption.png b/train_interruption.png
+deleted file mode 100644
+index 3e09078..0000000
+Binary files a/train_interruption.png and /dev/null differ
