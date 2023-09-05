@@ -139,6 +139,24 @@ def main():
     
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=21,)
     cglm.save_to_file()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=15,)
+    cglm.save_to_file()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=11,)
+    cglm.save_to_file()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=9,)
+    cglm.save_to_file()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=7,)
+    cglm.save_to_file()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=5,)
+    cglm.save_to_file()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=3,)
+    cglm.save_to_file()
     
     cglm.interior_land_mask.plot()
     plt.savefig('coarse_interior_land_mask_expanded.png')

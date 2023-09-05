@@ -430,6 +430,419 @@ class FullyCNN(DetectOutputSizeMixin, Sequential):
 #         self.add_final_activation('identity')
 
 
+class CNN15x15(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 186, 3, padding=padding_3)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(186, 93, 3, padding=padding_3)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(93, 46, 3, padding=padding_3)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(46, 46, 3, padding=padding_3)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(46, 46, 3, padding=padding_3)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(46, 46, 3, padding=padding_3)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(46, 46, 2, padding=padding_2)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(46, n_out_channels, 2, padding=padding_2)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+
+
+class CNN11x11(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 208, 3, padding=padding_3)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(208, 104, 3, padding=padding_3)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(104, 52, 2, padding=padding_2)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(52, 52, 2, padding=padding_2)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(52, 52, 2, padding=padding_2)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(52, 52, 2, padding=padding_2)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(52, 52, 2, padding=padding_2)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(52, n_out_channels, 2, padding=padding_2)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+
+
+class CNN9x9(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 271, 2, padding=padding_2)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(271, 136, 2, padding=padding_2)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(136, 68, 2, padding=padding_2)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(68, 68, 2, padding=padding_2)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(68, 68, 2, padding=padding_2)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(68, 68, 2, padding=padding_2)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(68, 68, 2, padding=padding_2)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(68, n_out_channels, 2, padding=padding_2)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+
+
+class CNN7x7(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 279, 2, padding=padding_2)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(279, 140, 2, padding=padding_2)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(140, 70, 2, padding=padding_2)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(70, 70, 2, padding=padding_2)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(70, 70, 2, padding=padding_2)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(70, 70, 2, padding=padding_2)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(70, 70, 1, padding=padding_1)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(70, n_out_channels, 1, padding=padding_1)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+        
+
+class CNN5x5(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 296, 2, padding=padding_2)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(296, 148, 2, padding=padding_2)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(148, 74, 2, padding=padding_2)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(74, 74, 2, padding=padding_2)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(74, 74, 1, padding=padding_1)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(74, 74, 1, padding=padding_1)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(74, 74, 1, padding=padding_1)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(74, n_out_channels, 1, padding=padding_1)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+        
+
+class CNN3x3(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 327, 2, padding=padding_2)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(327, 164, 2, padding=padding_2)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(164, 82, 1, padding=padding_1)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(82, 82, 1, padding=padding_1)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(82, 82, 1, padding=padding_1)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(82, 82, 1, padding=padding_1)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(82, 82, 1, padding=padding_1)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(82, n_out_channels, 1, padding=padding_1)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+        
+
+class CNN1x1(DetectOutputSizeMixin, Sequential):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+            padding_2 = 0
+            padding_1 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+            padding_2 = 0
+            padding_1 = 0
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+        conv1 = torch.nn.Conv2d(n_in_channels, 528, 1, padding=padding_1)
+        block1 = self._make_subblock(conv1)
+        conv2 = torch.nn.Conv2d(528, 264, 1, padding=padding_1)
+        block2 = self._make_subblock(conv2)
+        conv3 = torch.nn.Conv2d(264, 132, 1, padding=padding_1)
+        block3 = self._make_subblock(conv3)
+        conv4 = torch.nn.Conv2d(132, 132, 1, padding=padding_1)
+        block4 = self._make_subblock(conv4)
+        conv5 = torch.nn.Conv2d(132, 132, 1, padding=padding_1)
+        block5 = self._make_subblock(conv5)
+        conv6 = torch.nn.Conv2d(132, 132, 1, padding=padding_1)
+        block6 = self._make_subblock(conv6)
+        conv7 = torch.nn.Conv2d(132, 132, 1, padding=padding_1)
+        block7 = self._make_subblock(conv7)
+        conv8 = torch.nn.Conv2d(132, n_out_channels, 1, padding=padding_1)
+        Sequential.__init__(self, *block1, *block2, *block3, *block4, *block5,
+                            *block6, *block7, conv8)
+        
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x):
+        x = super().forward(x)
+        
+        # mean,prec = torch.split(x,x.shape[1]//2,dim = 1)
+        # prec = torch.nn.functional.softplus(prec)
+        # return mean,prec
+        # Temporary fix for the student loss
+        return self.final_transformation(x)
+
+    def _make_subblock(self, conv):
+        subbloc = [conv, nn.ReLU()]
+        if self.batch_norm:
+            subbloc.append(nn.BatchNorm2d(conv.out_channels))
+        return subbloc
+
+
 if __name__ == '__main__':
     import numpy as np
     # net = FullyCNN(1, 100*100, 100, 100)

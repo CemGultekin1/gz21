@@ -77,6 +77,8 @@ parser.add_argument('--model_module_name', type=str, default='models.models1',
                     help='Name of the module containing the nn model')
 parser.add_argument('--model_cls_name', type=str, default='FullyCNN',
                     help='Name of the class defining the nn model')
+parser.add_argument('--cnn_stencil_size', type=int, default=21,
+                    help='Stencil size required by the nn model')
 parser.add_argument('--loss_cls_name', type=str,
                     default='HeteroskedasticGaussianLossV2',
                     help='Name of the loss function used for training.')
@@ -184,7 +186,7 @@ def get_length(varname:str):
         return train_index
     else:
         return ntimes - test_index + 1
-def dataset_initiator(domain :str = "four_regions"):
+def dataset_initiator(domain :str = "four_regions", stencil_size:int = 21):
     # Split into train and test datasets
     global_ds =  load_data_from_past()#load_data_from_run(params.run_id)
     global_ds = global_ds.sel(yu_ocean = slice(-85,85))
@@ -213,7 +215,7 @@ def dataset_initiator(domain :str = "four_regions"):
         features_transform = ComposeTransforms()
         targets_transform = ComposeTransforms()
         transform = DatasetTransformer(features_transform, targets_transform)
-        dataset = DatasetWithTransform(dataset, transform)
+        dataset = DatasetWithTransform(dataset, transform,stencil_size=stencil_size)
         train_dataset = Subset_(dataset, np.arange(train_index))
         test_dataset = Subset_(dataset, np.arange(test_index, len(dataset)))
         train_datasets.append(train_dataset)
@@ -235,12 +237,11 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._init_kwargs = _init_kwargs
         self._subset = None
         self._land_mask = land_mask
+        # self._stencil_size = stencil_size
     def add_transforms_from_model(self,model):
         self._model = model
     def lazy__init__(self,):
         train_dataset,test_dataset,datasets,_,_ = dataset_initiator(**self._init_kwargs)
-        print(train_dataset)
-        raise Exception
         if self.varname == "train_dataset":
             subset =  train_dataset
         else:
@@ -251,7 +252,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         self._subset = subset
         if self._land_mask  != "None":
             from gz21.data.landmasks import CoarseGridLandMask
-            self.cglm = CoarseGridLandMask()
+            self.cglm = CoarseGridLandMask(cnn_field_of_view=params.cnn_stencil_size)
         else:
             self.cglm = None
     @property
@@ -297,8 +298,8 @@ class LazyDatasetWrapper(ConcatDataset_):
                 spslc = slice(spread,-spread)
                 land_mask = land_mask[:,spslc,spslc]
             y = y*land_mask
-            print(y.shape)
-            print(x.shape)
+            # print(y.shape)
+            # print(x.shape)
             return x,y#,land_mask
     def __len__(self,):
         return self._length
@@ -307,9 +308,9 @@ class LazyDatasetWrapper(ConcatDataset_):
 # produce fields of the same shape, hence should be called after saving
 # the transformation so that when we're going to test on another region
 # this does not occur.
-train_dataset = LazyDatasetWrapper('train_dataset',land_mask = params.land_mask,domain = params.domain) #ConcatDataset_(train_datasets)
-test_dataset = LazyDatasetWrapper('test_dataset',land_mask = params.land_mask,domain = params.domain) #ConcatDataset_(test_datasets)
-test_dataset_for_transform = LazyDatasetWrapper('test_dataset',land_mask = params.land_mask,domain = params.domain) 
+train_dataset = LazyDatasetWrapper('train_dataset',land_mask = params.land_mask,domain = params.domain, stencil_size = params.cnn_stencil_size) #ConcatDataset_(train_datasets)
+test_dataset = LazyDatasetWrapper('test_dataset',land_mask = params.land_mask,domain = params.domain, stencil_size = params.cnn_stencil_size) #ConcatDataset_(test_datasets)
+test_dataset_for_transform = LazyDatasetWrapper('test_dataset',land_mask = params.land_mask,domain = params.domain, stencil_size = params.cnn_stencil_size) 
 # FIN DATA---------------------------------------------------------------------
 
 

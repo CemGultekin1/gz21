@@ -521,9 +521,10 @@ class RawDataFromXrDataset(Dataset):
 
 
 class DatasetWithTransform:
-    def __init__(self, dataset, transform):
+    def __init__(self, dataset, transform, stencil_size:int = 21):
         self.dataset = dataset
         self.transform = transform
+        self.stencil_size = stencil_size
 
     @property
     def output_coords(self):
@@ -601,7 +602,7 @@ class DatasetWithTransform:
         # TODO make this adaptable
         if self.attrs.get('cycle') is not None:
             cycle_length = self.attrs['cycle']
-            cycle_repeat = CyclicRepeat(2, 'width', cycle_length, 10)
+            cycle_repeat = CyclicRepeat(2, 'width', cycle_length, (self.stencil_size-1)/2) #change by cheng from 10 to 3
             self.add_features_transform(cycle_repeat)
         if hasattr(model, 'get_features_transform'):
             transform = model.get_features_transform()
@@ -613,8 +614,8 @@ class DatasetWithTransform:
     def add_targets_transform_from_model(self, model):
         """Automatically reshapes the targets of the dataset to match
         the shape of the output of the model."""
-        output_height = self.height - 20 #model.output_height(self.height, self.width)
-        output_width = self.width - 20#model.output_width(self.height, self.width)
+        output_height = self.height - (self.stencil_size-1) #model.output_height(self.height, self.width) Cheng change 20 to 6 for CNN7x7 
+        output_width = self.width - (self.stencil_size-1)#model.output_width(self.height, self.width) Cheng change 20 to 6 for CNN7x7 
         transform = CropToNewShape(output_height, output_width)
         self.add_targets_transform(transform)
         return transform
