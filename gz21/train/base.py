@@ -127,7 +127,7 @@ class Trainer:
             Y_hat = self.net(X)
 
             # Compute loss
-            loss =  self.criterion(Y_hat, Y)
+            loss =  self.criterion(Y_hat[0], Y)
             
             # torchdict = dict(input =X, true_result = Y, output = Y_hat, mask = M,loss = loss.detach().item(), **self.net.state_dict())
             # torch.save(torchdict,f'train_interrupt_{i_batch}_.pth')

@@ -4,30 +4,17 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    paths = [
-        '/scratch/cg3306/climate/subgrid/gz21/slurm/echo/train_32889750_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33168641_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199949_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199951_1.out',
-        '/scratch/cg3306/climate/temp/gz21/slurm/echo/train_33199952_1.out',
-        
-    ]
-    
-    paths = [
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out',
-    ]
+
     paths = [        
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199964_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199965_1.out',
-        '/scratch/cg3306/climate/temp/gz21_new/gz21/slurm/echo/train_33199939_1.out'
+        '/scratch/cz3056/CNN_train/Arthur_model/gz21_stencil_size/gz21/slurm/echo/gtrain_37894446_1.out',
+        '/scratch/cz3056/CNN_train/Arthur_model/gz21_stencil_size/gz21/slurm/echo/gtrain_37592141_1.out',
+        # '/scratch/cz3056/CNN_train/Arthur_model/gz21/slurm/echo/ggtrain_37359433_1.out'
     ]
 
     labels = [
-        'cem_20230511_1_four_regions_fixed_branch',   
-        'cem_20230512_four_regions_fixed_branch',
-        'cem_20230512_1_four_regions_fixed_branch',         
+        'CNN3X3',   
+        'CNN15X15',
+        'global + double gyre',         
     ]
     fig,axs = plt.subplots(len(paths),3,figsize = (20,30))
     titles = [
@@ -40,16 +27,16 @@ def main():
         'epochs',
         'epochs'
     ]
-    for i in range(3):
+    for i in range(1,3):
         for j,(path,label) in enumerate(zip(paths,labels)):
             log = read_log(path)
             
             v1 = [x for x in zip(*log)][i]
             v1 = [x for x in v1 if x is not None]
-            axs[j,i].plot(v1,label = label)
+            axs[j,1].plot(v1,label = label)
             axs[j,i].grid()
             axs[j,i].set_title(f"{label} - {titles[i]}")
-    fig.savefig('logs_four_regions_fixed.png')
+    fig.savefig('/scratch/cz3056/CNN_train/logs_four_regions_fixed.png')
         # continue
         # log1 = read_log(paths[0])
         # log2 = read_log(paths[1])
