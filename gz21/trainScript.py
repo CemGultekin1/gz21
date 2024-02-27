@@ -31,6 +31,7 @@ from testing.metrics import MSEMetric, MaxMetric
 from train.base import Trainer
 import train.losses
 import models.transforms
+from gz21.data.landmasks import CoarseGridLandMask
 
 import argparse
 import importlib
@@ -96,6 +97,8 @@ parser.add_argument('--seed', type=int, default=0,
                     help='torch.manual_seed')
 parser.add_argument('--land_mask', type=str, default='None',
                     help="use 'None' for no masking, 'interior' for interior ocean masking 'default' for normal masking ")
+parser.add_argument('--cnn_padding', type=str, default='None',
+                    help="use 'None' for zero padding at first layer, 'Zero' for zero padding at each layer, 'replicate' for replicate padding at each layer")
 parser.add_argument('--domain', type=str, default="four_regions",
                     help="use 'global' for training on the whole globe")
 parser.add_argument('--num_workers', type=int, default=8,
@@ -251,22 +254,18 @@ class LazyDatasetWrapper(ConcatDataset_):
         self.__dict__.update(subset.__dict__)
         self._subset = subset
         if self._land_mask  != "None":
-            from gz21.data.landmasks import CoarseGridLandMask
             self.cglm = CoarseGridLandMask(cnn_field_of_view=params.cnn_stencil_size)
         else:
-            self.cglm = None
+            self.cglm = CoarseGridLandMask(cnn_field_of_view=1)
     @property
     def land_mask(self,):
         if not self._lazy_init_flag:
             self.lazy__init__()
             self._lazy_init_flag = True
-        if self.cglm is None:
-            return None
-        else:
-            if self._land_mask == "interior":
-                return self.cglm.interior_land_mask
-            elif self._land_mask == "default":
-                return self.cglm.land_mask
+        if self._land_mask == "interior":
+            return self.cglm.interior_land_mask
+        elif self._land_mask == "default" or self._land_mask == 'None':
+            return self.cglm.land_mask
     def inverse_transform_target(self,*args,**kwargs):
         if not self._lazy_init_flag:
             self.lazy__init__()
@@ -287,20 +286,23 @@ class LazyDatasetWrapper(ConcatDataset_):
         x = np.where(np.isnan(x),0,x)
         
         y = np.where(np.isnan(y),0,y)
-        if self.land_mask is None:            
-            return x,y#,y[:1]*0 + 1
-        else:
-            land_mask = self.land_mask
-            land_mask = np.where(land_mask == 0,np.nan,1)
-            
-            spread = (land_mask.shape[1] - y.shape[1])//2
-            if spread > 0:
-                spslc = slice(spread,-spread)
-                land_mask = land_mask[:,spslc,spslc]
-            y = y*land_mask
-            # print(y.shape)
-            # print(x.shape)
-            return x,y#,land_mask
+
+        land_mask = self.land_mask
+        land_mask = np.where(np.isnan(land_mask),0,land_mask)
+        # if self._land_mask == "None":
+        #     x = x*land_mask
+        # land_mask = np.where(land_mask == 0,np.nan,1)
+        # print('y shape:',y.shape)
+        # print('x shape:',x.shape)
+        # print('landmask shape:',land_mask.shape)
+        
+        # spread = (land_mask.shape[1] - y.shape[1])//2
+        # if spread > 0:
+        #     spslc = slice(spread,-spread)
+        #     land_mask = land_mask[:,spslc,spslc]
+        # y  = y*land_mask[:,spslc,spslc]
+        # land_mask = np.where(land_mask == 0,np.nan,1)
+        return x,y#,land_mask
     def __len__(self,):
         return self._length
 
@@ -398,12 +400,15 @@ for metric_name, metric in metrics.items():
     metric.inv_transform = lambda x: transform.inverse_transform_target(x)
     trainer.register_metric(metric_name, metric)
 
+matrix_dict={}
 for i_epoch in range(n_epochs):
     print('Epoch number {}.'.format(i_epoch))
     # TODO remove clipping?
-    train_loss = trainer.train_for_one_epoch(train_dataloader, optimizer,
-                                            lr_scheduler, clip=1.)
-    test = trainer.test(train_dataloader)#test_dataloader)
+    train_loss,matrix_dict  = trainer.train_for_one_epoch(train_dataloader, optimizer,
+                                            lr_scheduler, clip=1., cnn_padding=params.cnn_padding, 
+                                            matrix_dict=matrix_dict)
+    test = trainer.test(train_dataloader,cnn_padding=params.cnn_padding, 
+                        matrix_dict=matrix_dict)#test_dataloader)
     if test == 'EARLY_STOPPING':
         print(test)
         break

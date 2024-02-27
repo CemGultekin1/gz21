@@ -332,6 +332,443 @@ class Divergence2d(Module):
         return res
 
 
+#new FullyCNN to solve boundary issue
+#->
+def replicate_nans(_x):
+  '''
+  x is 4D tensor N x C x Ny x Nx
+  returns nans filled with nearest neighbour
+  We assume that NaNs occur consistently
+  in the full NxC dimensitons
+  '''
+  mask_array = torch.isnan(_x[0,0,:,:]).clone()
+  ny, nx = mask_array.shape
+  def mask(j,i):
+    if j < ny and j > -1 and i < nx and i > -1:
+      return mask_array[j,i]
+    else:
+      return True
+  x = _x.clone()
+  for j in range(x.shape[-2]):
+    for i in range(x.shape[-1]):
+      if mask(j,i):
+        if mask(j,i+1) and mask(j,i-1) and mask(j+1,i) and mask(j-1,i) and mask(j+1,i+1) and mask(j+1,i-1) and mask(j-1,i+1) and mask(j-1,i-1):
+          continue # nothing to interoplate
+
+        x[:,:,j,i] = 0.
+        n = 0
+        if (not mask(j,i+1)):
+          x[:,:,j,i] += x[:,:,j,i+1]
+          n += 1
+
+        if (not mask(j,i-1)):
+          x[:,:,j,i] += x[:,:,j,i-1]
+          n += 1
+
+        if (not mask(j+1,i)):
+          x[:,:,j,i] += x[:,:,j+1,i]
+          n += 1
+
+        if (not mask(j-1,i)):
+          x[:,:,j,i] += x[:,:,j-1,i]
+          n += 1
+
+        if (not mask(j+1,i+1)):
+          x[:,:,j,i] += x[:,:,j+1,i+1]
+          n += 1
+
+        if (not mask(j+1,i-1)):
+          x[:,:,j,i] += x[:,:,j+1,i-1]
+          n += 1
+
+        if (not mask(j-1,i+1)):
+          x[:,:,j,i] += x[:,:,j-1,i+1]
+          n += 1
+
+        if (not mask(j-1,i-1)):
+          x[:,:,j,i] += x[:,:,j-1,i-1]
+          n += 1
+
+        if n==0:
+          print('Error')
+        else:
+          x[:,:,j,i] *= 1/n
+  return x
+
+def replicate_mat(maskn):
+  '''
+  create coefficient matrix A for maskn
+  Then filling nan in x with nearest neighbour
+  can be achieved by A*x
+  '''
+  mask_array = torch.isnan(maskn[0,0,:,:]).clone()
+  ny, nx = mask_array.shape
+  def mask(j,i):
+    if j < ny and j > -1 and i < nx and i > -1:
+      return mask_array[j,i]
+    else:
+      return True
+    
+  idi = []
+  idj = []
+  val = []
+  
+  for j in range(ny):
+    for i in range(nx):
+      if mask(j,i):
+
+        n = 0
+        k = j*nx+i
+
+        if mask(j,i+1) and mask(j,i-1) and mask(j+1,i) and mask(j-1,i) and mask(j+1,i+1) and mask(j+1,i-1) and mask(j-1,i+1) and mask(j-1,i-1):
+          idi.append(k)
+          idj.append(k)
+
+        if (not mask(j,i+1)):
+          idi.append(k+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j,i-1)):
+          idi.append(k-1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i)):
+          idi.append(k+nx)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i)):
+          idi.append(k-nx)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i+1)):
+          idi.append(k+nx+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i-1)):
+          idi.append(k+nx-1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i+1)):
+          idi.append(k-nx+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i-1)):
+          idi.append(k-nx-1)
+          idj.append(k)
+          n += 1
+
+        if n==0:
+          val.append(torch.tensor(float('nan')))
+        else:
+          n_val = [1/n] * n
+          val.extend(n_val)
+      else:
+          k = j*nx+i
+          idi.append(k)
+          idj.append(k)
+          val.append(1)
+
+  indices = torch.tensor([idj,idi])
+  values = torch.tensor(val, dtype=torch.float32)
+  A = torch.sparse_coo_tensor(indices=indices, values=values, size=[nx*ny,nx*ny])
+  return A
+
+def replicate_mat_new(maskn):
+  '''
+  create coefficient matrix A for mask0 (without include any nan)
+  mask0 has values either 1 or 0
+  can be achieved by A*x to fill land points with nearest neighbours
+  '''
+#   mask_array = torch.isnan(maskn[0,0,:,:]).clone()
+  mask_array = maskn[0,0,:,:] == 0
+  ny, nx = mask_array.shape
+  def mask(j,i):
+    if j < ny and j > -1 and i < nx and i > -1:
+      return mask_array[j,i]
+    else:
+      return True
+    
+  idi = []
+  idj = []
+  val = []
+  
+  for j in range(ny):
+    for i in range(nx):
+      if mask(j,i):
+
+        n = 0
+        k = j*nx+i
+
+        if mask(j,i+1) and mask(j,i-1) and mask(j+1,i) and mask(j-1,i) and mask(j+1,i+1) and mask(j+1,i-1) and mask(j-1,i+1) and mask(j-1,i-1):
+          idi.append(k)
+          idj.append(k)
+
+        if (not mask(j,i+1)):
+          idi.append(k+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j,i-1)):
+          idi.append(k-1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i)):
+          idi.append(k+nx)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i)):
+          idi.append(k-nx)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i+1)):
+          idi.append(k+nx+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i-1)):
+          idi.append(k+nx-1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i+1)):
+          idi.append(k-nx+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i-1)):
+          idi.append(k-nx-1)
+          idj.append(k)
+          n += 1
+
+        if n==0:
+          val.append(torch.tensor(float(0.0)))
+        else:
+          n_val = [1/n] * n
+          val.extend(n_val)
+      else:
+          k = j*nx+i
+          idi.append(k)
+          idj.append(k)
+          val.append(1)
+
+  indices = torch.tensor([idj,idi])
+  values = torch.tensor(val, dtype=torch.float32)
+  A = torch.sparse_coo_tensor(indices=indices, values=values, size=[nx*ny,nx*ny])
+  return A
+
+def replicate_mat_zero(mask0):
+  '''
+  create coefficient matrix A for mask0 (without include any nan)
+  mask0 has values either 1 or 0
+  can be achieved by A*x to fill land points with nearest neighbours
+  '''
+  mask_array = mask0[0,0,:,:] == 0
+  ny, nx = mask_array.shape
+  def mask(j,i):
+    if j < ny and j > -1 and i < nx and i > -1:
+      return mask_array[j,i]
+    else:
+      return True
+    
+  idi = []
+  idj = []
+  val = []
+  
+  for j in range(ny):
+    for i in range(nx):
+      if mask(j,i):
+
+        n = 0
+        k = j*nx+i
+
+        if mask(j,i+1) and mask(j,i-1) and mask(j+1,i) and mask(j-1,i) and mask(j+1,i+1) and mask(j+1,i-1) and mask(j-1,i+1) and mask(j-1,i-1):
+          idi.append(k)
+          idj.append(k)
+
+        if (not mask(j,i+1)):
+          idi.append(k+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j,i-1)):
+          idi.append(k-1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i)):
+          idi.append(k+nx)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i)):
+          idi.append(k-nx)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i+1)):
+          idi.append(k+nx+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j+1,i-1)):
+          idi.append(k+nx-1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i+1)):
+          idi.append(k-nx+1)
+          idj.append(k)
+          n += 1
+
+        if (not mask(j-1,i-1)):
+          idi.append(k-nx-1)
+          idj.append(k)
+          n += 1
+
+        if n==0:
+          val.append(torch.tensor(float(0.0)))
+        else:
+          n_val = [1/n] * n
+          val.extend(n_val)
+      else:
+          k = j*nx+i
+          idi.append(k)
+          idj.append(k)
+          val.append(1)
+
+  indices = torch.tensor([idj,idi])
+  values = torch.tensor(val, dtype=torch.float32)
+  A = torch.sparse_coo_tensor(indices=indices, values=values, size=[nx*ny,nx*ny])
+  return A
+
+def replicate_nans_new(x,A):
+  '''
+  x is 4D tensor N x C x Ny x Nx
+  returns nans filled with nearest neighbour
+  We assume that NaNs occur consistently
+  in the full NxC dimensitons
+  We use A*x to update x
+  '''
+#   print('x.shape',_x.shape)
+  _x=x.clone()
+#   _A=A.clone()
+#   flat_x = _x.reshape(_x.size(0), _x.size(1), -1)
+#   print(flat_x.shape)
+#   print('_x.size(2)* _x.size(3)',_x.size(2)* _x.size(3))
+  flat_x = _x.reshape(-1, _x.size(2)* _x.size(3))
+#   print(flat_x.shape)
+  # print(A.shape)
+  xx = torch.matmul(A, flat_x.T).T
+  # print(xx.shape)
+  _x = xx.reshape(_x.size(0), _x.size(1), _x.size(2), _x.size(3))
+  return _x
+
+
+class FullyCNN_BC(DetectOutputSizeMixin, Module):
+    def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
+                 padding=None, batch_norm=False):
+        super(FullyCNN_BC, self).__init__()
+        if padding is None:
+            padding_5 = 0
+            padding_3 = 0
+        elif padding == 'same':
+            padding_5 = 2
+            padding_3 = 1
+        else:
+            raise ValueError('Unknow value for padding parameter.')
+        self.n_in_channels = n_in_channels
+        self.batch_norm = batch_norm
+
+        self.conv1 = nn.Conv2d(n_in_channels, 128, 5, padding=padding_5)
+        if self.batch_norm:
+          self.batch_norm1 = nn.BatchNorm2d(self.conv1.out_channels) 
+        self.conv2 = nn.Conv2d(128, 64, 5, padding=padding_5)
+        if self.batch_norm:
+          self.batch_norm2 = nn.BatchNorm2d(self.conv2.out_channels) 
+        self.conv3 = nn.Conv2d(64, 32, 3, padding=padding_3)
+        if self.batch_norm:
+          self.batch_norm3 = nn.BatchNorm2d(self.conv3.out_channels) 
+        self.conv4 = nn.Conv2d(32, 32, 3, padding=padding_3)
+        if self.batch_norm:
+          self.batch_norm4 = nn.BatchNorm2d(self.conv4.out_channels) 
+        self.conv5 = nn.Conv2d(32, 32, 3, padding=padding_3)
+        if self.batch_norm:
+          self.batch_norm5 = nn.BatchNorm2d(self.conv5.out_channels) 
+        self.conv6 = nn.Conv2d(32, 32, 3, padding=padding_3)
+        if self.batch_norm:
+          self.batch_norm6 = nn.BatchNorm2d(self.conv6.out_channels) 
+        self.conv7 = nn.Conv2d(32, 32, 3, padding=padding_3)
+        if self.batch_norm:
+          self.batch_norm7 = nn.BatchNorm2d(self.conv7.out_channels) 
+        self.conv8 = nn.Conv2d(32, n_out_channels, 3, padding=padding_3)
+        self.relu = nn.ReLU()
+
+    @property
+    def final_transformation(self):
+        return self._final_transformation
+
+    @final_transformation.setter
+    def final_transformation(self, transformation):
+        self._final_transformation = transformation
+
+    def forward(self, x, mask0=None, replicate=True, matrix_dict=None,use_cuda=False,gpu_id=0,i_batch=0):
+        halo = 0
+        for i in range(1, 9): #8 depth
+            # #new way (no nan involved)
+            conv = getattr(self, f'conv{i}') #get the conv layer name
+            if i<8 and self.batch_norm:
+                batchnorm = getattr(self, f'batch_norm{i}') #get the batch norm layer name
+            if mask0 is not None:
+                #to adapt the mask size to the input of each layer
+                mask = mask0[0,0,:,:].unsqueeze(0).unsqueeze(0).expand(x.shape[0], x.shape[1], -1, -1)
+                mask_halo = mask[:, :, halo:-halo, halo:-halo] if halo > 0 else mask
+                #fill values to land points by nearest values
+                if replicate is True:
+                  for n in range(1,conv.kernel_size[0]//2+1):# 3x3 kernel needs one replicate and 5x5 needs two replicates
+                    if f'A_{i}_{n}' not in matrix_dict:
+                        matrix_dict[f'A_{i}_{n}'] = replicate_mat_zero(mask_halo) #create matrix and save in a tuple only in first time
+                        # print('mask_halo'+f'A_{i}_{n}',mask_halo[0,0,:,:])
+                        if use_cuda:
+                            matrix_dict[f'A_{i}_{n}']=matrix_dict[f'A_{i}_{n}'].cuda(gpu_id)
+                        mask_halo = replicate_nans_new(mask_halo,matrix_dict[f'A_{i}_{n}'])
+                        # print('mask_halo'+f'A_{i}_{n}',mask_halo[0,0,:,:])
+                    x = replicate_nans_new(x,matrix_dict[f'A_{i}_{n}'])
+                    # print(i,n,x[0,0,:,:])
+                else:
+                    x = x * mask_halo.nan_to_num(0.)
+            # x = x.nan_to_num(0.)
+            # print('before conv: x',x[0,0,:,:])
+            x = conv(x)
+            # print('after conv: x',x[0,0,:,:])
+            halo = halo + conv.kernel_size[0]//2
+            if mask0 is not None and replicate is False:
+                x = x.nan_to_num(0.)
+            if i<8:
+              x = self.relu(x)
+              x = batchnorm(x) if self.batch_norm else x
+            else:
+              if mask0 is not None:
+                  mask = mask0[0,0,:,:].unsqueeze(0).unsqueeze(0).expand(x.shape[0], x.shape[1], -1, -1)
+                  x = x.nan_to_num(0.)*mask[:, :, halo:-halo, halo:-halo].nan_to_num(0.)
+              x = self.final_transformation(x)
+            
+        if mask0 is None:
+           return self.final_transformation(x)
+        elif mask0 is not None:
+           return self.final_transformation(x), matrix_dict
+#<-
+
+
 class FullyCNN(DetectOutputSizeMixin, Sequential):
     def __init__(self, n_in_channels: int = 2, n_out_channels: int = 4,
                  padding=None, batch_norm=False):

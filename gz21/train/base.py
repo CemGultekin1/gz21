@@ -84,7 +84,8 @@ class Trainer:
         self._metrics[metric_name] = metric
 
     def train_for_one_epoch(self, dataloader: DataLoader, optimizer,
-                            scheduler=None, clip: float = None) -> float:
+                            scheduler=None, clip: float = None, 
+                            cnn_padding = None, matrix_dict={}):
         """Trains the neural network for one epoch.
 
         Training uses the data provided through the dataloader passed as an
@@ -119,12 +120,35 @@ class Trainer:
             # Move batch to the GPU (if possible)
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
-            # M = batch[2].to(self._device, dtype=torch.float)
-            # print(X.shape,Y.shape,M.shape)
-            # RX = torch.randn(X.shape)
-            # RX[X!=0] = 0
-            # Y_hat = self.net(RX)
-            Y_hat = self.net(X)
+            # M = batch[2]
+            # maskn=torch.where(M == 0.0,torch.tensor(float('nan')),M)
+            # M = M.to(self._device, dtype=torch.float)
+            # maskn=maskn.to(self._device, dtype=torch.float)
+            # # X = M*X
+            # spread = (M.shape[2] - Y.shape[2])//2
+            # if spread > 0:
+            #     spslc = slice(spread,-spread)
+            #     Y  = Y*maskn[:,:,spslc,spslc]
+            # else:
+            #     Y  = Y*maskn
+            # # Y  = Y*M[:,:,spslc,spslc]
+            if cnn_padding == "None":
+                Y_hat= self.net(X)
+            elif cnn_padding != "None":
+                replicate = False
+                if cnn_padding == 'replicate':
+                    replicate = True
+                # print('y shape:',Y.shape)
+                # print('x shape:',X.shape)
+                # print('landmask shape:',M.shape)
+                # RX = torch.randn(X.shape)
+                # RX[X!=0] = 0
+                # Y_hat = self.net(RX)
+                Y_hat,matrix_dict = self.net(X, mask0=M, replicate=replicate, matrix_dict=matrix_dict,use_cuda=True,i_batch=i_batch)
+            # print('Y_hat has nan',torch.any(torch.isnan(Y_hat)))
+            # print('Y_hat shape',Y_hat.shape)
+            # print("The tensor contains NaN values:",torch.isnan(Y_hat[0]).any())
+            # print("The max values and min values:",torch.max(Y_hat[0]),torch.min(Y_hat[0]))
 
             # Compute loss
             loss =  self.criterion(Y_hat, Y)
@@ -165,9 +189,9 @@ class Trainer:
         # Update the learning rate via the scheduler
         if scheduler is not None:
             scheduler.step()
-        return running_loss.value
+        return running_loss.value, matrix_dict
 
-    def test(self, dataloader) -> float:
+    def test(self, dataloader,cnn_padding = None,matrix_dict={}) -> float:
         """Returns the validation loss on the provided data.
 
         The criterion used is the same as the one used for the training.
@@ -196,7 +220,25 @@ class Trainer:
                 # Move batch to GPU
                 X = batch[0].to(self._device, dtype=torch.float)
                 Y = batch[1].to(self._device, dtype=torch.float)
-                Y_hat = self.net(X)                
+                # M = batch[2]
+                # maskn=torch.where(M == 0.0,torch.tensor(float('nan')),M)
+                # M = M.to(self._device, dtype=torch.float)
+                # maskn=maskn.to(self._device, dtype=torch.float)
+                # # X = M*X
+                # spread = (M.shape[2] - Y.shape[2])//2
+                # if spread > 0:
+                #     spslc = slice(spread,-spread)
+                #     Y  = Y*maskn[:,:,spslc,spslc]
+                # else:
+                #     Y  = Y*maskn
+                # # Y  = Y*M[:,:,spslc,spslc]
+                if cnn_padding == "None":
+                    Y_hat= self.net(X)
+                elif cnn_padding != "None":
+                    replicate = False
+                    if cnn_padding == 'replicate':
+                        replicate = True
+                    Y_hat, _ = self.net(X, mask0=M, replicate=replicate, matrix_dict=matrix_dict,use_cuda=True)                
                 # Compute loss
                 loss = self.criterion(Y_hat, Y)
                 running_loss.update(loss.item(), X.size(0))

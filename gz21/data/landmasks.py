@@ -68,8 +68,15 @@ class CoarseGridLandMask:
         interior_land_mask = xr.where(interior_land_mask>0,1,0)
         interior_land_mask = interior_land_mask.sel(yu_ocean = slice(self.ylim[0],self.ylim[1]))
         _interior_land_mask = 1 - expand_for_cnn_spread(interior_land_mask,self.cnn_field_of_view,mode = self.mode)
+        
+        
+        
+        patch_data, _ = get_patch_from_file(1,None,0,'usurf', 'vsurf') 
+        for key in patch_data.keys():
+            patch_data[key] = xr.where(np.isnan(patch_data[key]), 1,0)
         usurf = patch_data.usurf
         usurf = usurf.coarsen({'xu_ocean': int(self.factor),'yu_ocean': int(self.factor)},boundary='trim')
+        
         land_density = usurf.mean()
         land_mask = xr.where(land_density >= 0.5,1,0)
         land_mask = land_mask.sel(yu_ocean = slice(self.ylim[0],self.ylim[1]))
@@ -134,36 +141,85 @@ def main():
     plt.savefig('coarse_interior_land_mask.png')
     plt.close()
     
+    cglm.land_mask.plot()
     plt.savefig('coarse_land_mask.png')
     plt.close()
     
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=21,)
     cglm.save_to_file()
+    
+    cglm.interior_land_mask.plot()
+    plt.savefig('coarse_interior_land_mask_21x21.png')
+    plt.close()
+
+    cglm.land_mask.plot()
+    plt.savefig('coarse_land_mask_21x21.png')
+    plt.close()
 
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=15,)
     cglm.save_to_file()
 
+    cglm.interior_land_mask.plot()
+    plt.savefig('coarse_interior_land_mask_15x15.png')
+    plt.close()
+
+    cglm.land_mask.plot()
+    plt.savefig('coarse_land_mask_15x15.png')
+    plt.close()
+
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=11,)
     cglm.save_to_file()
+
+    cglm.interior_land_mask.plot()
+    plt.savefig('coarse_interior_land_mask_11x11.png')
+    plt.close()
+
+    cglm.land_mask.plot()
+    plt.savefig('coarse_land_mask_11x11.png')
+    plt.close()
 
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=9,)
     cglm.save_to_file()
 
+    cglm.interior_land_mask.plot()
+    plt.savefig('coarse_interior_land_mask_9x9.png')
+    plt.close()
+
+    cglm.land_mask.plot()
+    plt.savefig('coarse_land_mask_9x9.png')
+    plt.close()
+
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=7,)
     cglm.save_to_file()
+
+    cglm.interior_land_mask.plot()
+    plt.savefig('coarse_interior_land_mask_7x7.png')
+    plt.close()
+
+    cglm.land_mask.plot()
+    plt.savefig('coarse_land_mask_7x7.png')
+    plt.close()
 
     cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=5,)
     cglm.save_to_file()
 
-    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=3,)
-    cglm.save_to_file()
-    
     cglm.interior_land_mask.plot()
-    plt.savefig('coarse_interior_land_mask_expanded.png')
+    plt.savefig('coarse_interior_land_mask_5x5.png')
     plt.close()
 
     cglm.land_mask.plot()
-    plt.savefig('coarse_land_mask_expanded.png')
+    plt.savefig('coarse_land_mask_5x5.png')
+    plt.close()
+
+    cglm = CoarseGridLandMask(torch_flag=False,cnn_field_of_view=3,)
+    cglm.save_to_file()
+
+    cglm.interior_land_mask.plot()
+    plt.savefig('coarse_interior_land_mask_3x3.png')
+    plt.close()
+
+    cglm.land_mask.plot()
+    plt.savefig('coarse_land_mask_3x3.png')
     plt.close()
     
 if __name__ == '__main__':
