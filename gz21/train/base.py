@@ -120,18 +120,18 @@ class Trainer:
             # Move batch to the GPU (if possible)
             X = batch[0].to(self._device, dtype=torch.float)
             Y = batch[1].to(self._device, dtype=torch.float)
-            # M = batch[2]
-            # maskn=torch.where(M == 0.0,torch.tensor(float('nan')),M)
-            # M = M.to(self._device, dtype=torch.float)
-            # maskn=maskn.to(self._device, dtype=torch.float)
-            # # X = M*X
-            # spread = (M.shape[2] - Y.shape[2])//2
-            # if spread > 0:
-            #     spslc = slice(spread,-spread)
-            #     Y  = Y*maskn[:,:,spslc,spslc]
-            # else:
-            #     Y  = Y*maskn
-            # # Y  = Y*M[:,:,spslc,spslc]
+            M = batch[2]
+            maskn=torch.where(M == 0.0,torch.tensor(float('nan')),M)
+            M = M.to(self._device, dtype=torch.float)
+            maskn=maskn.to(self._device, dtype=torch.float)
+            # X = M*X
+            spread = (M.shape[2] - Y.shape[2])//2
+            if spread > 0:
+                spslc = slice(spread,-spread)
+                Y  = Y*maskn[:,:,spslc,spslc]
+            else:
+                Y  = Y*maskn
+            # Y  = Y*M[:,:,spslc,spslc]
             if cnn_padding == "None":
                 Y_hat= self.net(X)
             elif cnn_padding != "None":
@@ -220,18 +220,18 @@ class Trainer:
                 # Move batch to GPU
                 X = batch[0].to(self._device, dtype=torch.float)
                 Y = batch[1].to(self._device, dtype=torch.float)
-                # M = batch[2]
-                # maskn=torch.where(M == 0.0,torch.tensor(float('nan')),M)
-                # M = M.to(self._device, dtype=torch.float)
-                # maskn=maskn.to(self._device, dtype=torch.float)
-                # # X = M*X
-                # spread = (M.shape[2] - Y.shape[2])//2
-                # if spread > 0:
-                #     spslc = slice(spread,-spread)
-                #     Y  = Y*maskn[:,:,spslc,spslc]
-                # else:
-                #     Y  = Y*maskn
-                # # Y  = Y*M[:,:,spslc,spslc]
+                M = batch[2]
+                maskn=torch.where(M == 0.0,torch.tensor(float('nan')),M)
+                M = M.to(self._device, dtype=torch.float)
+                maskn=maskn.to(self._device, dtype=torch.float)
+                # X = M*X
+                spread = (M.shape[2] - Y.shape[2])//2
+                if spread > 0:
+                    spslc = slice(spread,-spread)
+                    Y  = Y*maskn[:,:,spslc,spslc]
+                else:
+                    Y  = Y*maskn
+                # Y  = Y*M[:,:,spslc,spslc]
                 if cnn_padding == "None":
                     Y_hat= self.net(X)
                 elif cnn_padding != "None":

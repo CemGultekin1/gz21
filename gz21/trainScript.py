@@ -302,7 +302,7 @@ class LazyDatasetWrapper(ConcatDataset_):
         #     land_mask = land_mask[:,spslc,spslc]
         # y  = y*land_mask[:,spslc,spslc]
         # land_mask = np.where(land_mask == 0,np.nan,1)
-        return x,y#,land_mask
+        return x,y,land_mask
     def __len__(self,):
         return self._length
 
